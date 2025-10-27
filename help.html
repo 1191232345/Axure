@@ -738,15 +738,15 @@
         
         textNodes.forEach(node => {
           const text = node.textContent;
-          const index = text.toLowerCase().indexOf(searchTerm);
+          const portal  = text.toLowerCase().portal Of(searchTerm);
           
-          if (index !== -1) {
+          if (portal  !== -1) {
             const parent = node.parentNode;
-            const before = document.createTextNode(text.substring(0, index));
+            const before = document.createTextNode(text.substring(0, portal ));
             const highlight = document.createElement('span');
             highlight.className = 'search-highlight bg-yellow-200';
-            highlight.textContent = text.substring(index, index + searchTerm.length);
-            const after = document.createTextNode(text.substring(index + searchTerm.length));
+            highlight.textContent = text.substring(portal , portal  + searchTerm.length);
+            const after = document.createTextNode(text.substring(portal  + searchTerm.length));
             
             parent.replaceChild(after, node);
             parent.insertBefore(highlight, after);
