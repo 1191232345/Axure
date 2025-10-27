@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>子账号管理 </title>
+  <!-- 引入外部资源 -->
+  <!-- 优化CDN加载 -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdn.tailwindcss.com">
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2a3b7d',
+            'primary-light': '#3a4ca7',
+            secondary: '#36CFC9',
+            accent: '#722ED1',
+            success: '#00B42A',
+            warning: '#FF7D00',
+            danger: '#F53F3F',
+            dark: '#1D2129',
+            'light-bg': '#FFFFFF',
+            'card-bg': '#FFFFFF',
+            border: '#E5E7EB'
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            'card': '0 2px 8px rgba(0, 0, 0, 0.05)',
+            'card-hover': '0 10px 25px -5px rgba(42, 59, 125, 0.1)',
+            'dropdown': '0 4px 16px rgba(0, 0, 0, 0.1)',
+            'header': '0 2px 4px rgba(0, 0, 0, 0.05)'
+          },
+          transitionTimingFunction: {
+            'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)'
+          }
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .text-shadow-sm {
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      }
+      .btn-primary {
+        @apply bg-primary text-white px-4 py-2 rounded-lg transition-all hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2;
+      }
+      .btn-secondary {
+        @apply bg-white text-primary border border-border px-4 py-2 rounded-lg transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2;
+      }
+      .btn-danger {
+        @apply bg-white text-danger border border-danger/20 px-4 py-2 rounded-lg transition-all hover:bg-danger/5 focus:outline-none focus:ring-2 focus:ring-danger/30 focus:ring-offset-2;
+      }
+      .input-primary {
+        @apply w-full px-4 py-2.5 rounded-lg border border-border bg-white text-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all;
+      }
+      .form-label {
+        @apply block text-sm font-medium text-gray-700 mb-1;
+      }
+      .checkbox-primary {
+        @apply w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/30;
+      }
+      .scroll-smooth {
+        scroll-behavior: smooth;
+      }
+      .scale-fade-in {
+        animation: scaleFadeIn 0.3s ease-out forwards;
+      }
+      @keyframes scaleFadeIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .scale-fade-out {
+        animation: scaleFadeOut 0.2s ease-in forwards;
+      }
+      @keyframes scaleFadeOut {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+      }
+      /* 表格行悬停效果 */
+      .table-hover-row:hover {
+        background-color: #f9fafb;
+      }
+      /* ERP按钮样式 */
+      .erp-btn {
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .erp-btn-primary {
+        background-color: #2a3b7d;
+        color: white;
+        border-color: #2a3b7d;
+      }
+      .erp-btn-primary:hover {
+        background-color: #3a4ca7;
+        border-color: #3a4ca7;
+      }
+      .erp-btn-secondary {
+        background-color: white;
+        color: #525252;
+        border-color: #d4d4d4;
+      }
+      .erp-btn-secondary:hover {
+        border-color: #a3a3a3;
+        color: #262626;
+      }
+      /* 浮动按钮样式 */
+      .floating-widgets {
+        position: fixed;
+        bottom: 80px;
+        right: 24px;
+        z-portal : 40;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .floating-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background-color: white;
+        border: 1px solid #E5E7EB;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .floating-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+      .floating-btn i {
+        font-size: 18px;
+        color: #2a3b7d;
+      }
+      .btn-text {
+        position: absolute;
+        right: 50px;
+        padding: 6px 12px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+      .floating-btn:hover .btn-text {
+        opacity: 1;
+      }
+      /* 模态框样式 */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-portal : 50;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+      .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+      }
+      .modal-content {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+      }
+      .modal-overlay.show .modal-content {
+        transform: translateY(0);
+      }
+      .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #E5E7EB;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .modal-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1D2129;
+      }
+      .modal-body {
+        padding: 0;
+      }
+      .modal-footer {
+        padding: 16px 20px;
+        border-top: 1px solid #E5E7EB;
+        display: flex;
+        justify-content: flex-end;
+      }
+      .close-btn {
+        background-color: white;
+        color: #2a3b7d;
+        border: 1px solid #E5E7EB;
+        border-radius: 4px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .close-btn:hover {
+        background-color: #f9fafb;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-sans bg-neutral-100 text-neutral-800 min-h-screen">
+  <!-- 顶部导航栏 -->
+  <header class="bg-primary text-white shadow-header sticky top-0 z-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-14">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <span class="text-lg font-semibold">ELSA</span>
+          </div>
+          <nav class="hidden md:ml-10 md:flex md:space-x-1">
+            <a href="portal .html" class="px-3 py-2 text-sm hover:bg-primary/80 transition-colors">首页</a>
+            <a href="subaccount.html" class="px-3 py-2 text-sm bg-primary/80 border-b-2 border-white">系统管理</a>
+          </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <button class="p-1.5 rounded hover:bg-primary/80 transition-colors">
+              <i class="fa fa-bell-o"></i>
+              <span class="absolute top-0 right-0 w-2 h-2 bg-warning rounded-full"></span>
+            </button>
+          </div>
+          <div class="flex items-center">
+            <span class="ml-2 text-sm hidden sm:inline-block">zsw</span>
+            <i class="fa fa-angle-down ml-1 text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 二级导航 -->
+    <div class="bg-[#3686da] border-t border-white/10">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center h-10 overflow-x-auto whitespace-nowrap">
+          <a href="subaccount.html" class="px-3 py-2 text-xs text-white bg-white/10 mr-1 rounded">子账号管理</a>
+        </div>
+      </div>
+    </div>
+
+  <!-- 主要内容区 -->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <div class="flex flex-1 overflow-hidden">
+    <!-- 主内容 -->
+    <main class="flex-1 overflow-y-auto bg-gray-50">
+      <div class="container mx-auto px-4 py-6">
+        <!-- 搜索卡片区域 -->
+        <div class="bg-white rounded shadow-card p-4 mb-4">
+
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div class="flex items-center w-full sm:w-auto">
+              <label class="text-xs text-neutral-600 mr-2">昵称：</label>
+              <div class="relative flex-1 sm:w-64">
+                <input type="text" id="subaccount-search" placeholder="请输入子昵称搜索..." class="w-full pl-7 pr-3 py-1.5 text-sm border border-neutral-300 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+                <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-xs"></i>
+              </div>
+            </div>
+            
+            <div class="flex items-center w-full sm:w-auto">
+              <label class="text-xs text-neutral-600 mr-2">状态：</label>
+              <div class="relative flex-1 sm:w-40">
+                <select id="status-filter" class="w-full pl-3 pr-8 py-1.5 text-sm border border-neutral-300 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none bg-white">
+                  <option value="">全部</option>
+                  <option value="active">启用</option>
+                  <option value="inactive">停用</option>
+                </select>
+                <i class="fa fa-angle-down absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-xs pointer-events-none"></i>
+              </div>
+            </div>
+            
+            <div class="flex gap-2 w-full sm:w-auto sm:ml-auto">
+              <button id="search-subaccount-btn" class="erp-btn erp-btn-primary flex items-center justify-center flex-1 sm:flex-none">
+                <i class="fa fa-search mr-1.5"></i> 搜索
+              </button>
+              <button id="reset-subaccount-btn" class="erp-btn erp-btn-secondary flex items-center justify-center flex-1 sm:flex-none">
+                <i class="fa fa-refresh mr-1.5"></i> 重置
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 操作卡片区域 -->
+        <div class="bg-white rounded shadow-card p-4 mb-4">
+          <div class="flex justify-start">
+            <button id="add-subaccount-btn" class="erp-btn erp-btn-primary flex items-center justify-center">
+              <i class="fa fa-plus mr-1.5"></i> 新增
+            </button>
+          </div>
+        </div>
+        
+        <!-- 列表卡片区域 -->
+        <div class="bg-white rounded shadow-card overflow-hidden mb-8">
+          <!-- 列表展示区域 -->
+          <div class="overflow-x-auto">
+            
+            <table class="min-w-full divide-y divide-neutral-200 text-sm">
+                <thead class="bg-neutral-100">
+                  <tr>
+                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">昵称</th>
+                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">用户名</th>
+                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">邮箱</th>
+                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">联系电话</th>
+                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">有效期开始</th>
+                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">有效期结束</th>
+                    <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">操作</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-neutral-200" id="subaccount-list">
+                  <!-- 示例数据行 -->
+                  <tr class="table-hover-row subaccount-row" data-id="1" data-name="张三">
+                    <td class="px-3 py-2">
+                      <div class="flex items-center">
+                        <div>
+                          <div class="font-medium">zsw</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-3 py-2">zsw</td>
+                    <td class="px-3 py-2">110231213@qq.com</td>
+                    <td class="px-3 py-2">13232231311</td>
+                    <td class="px-3 py-2">2025-10-01 14:00</td>
+                    <td class="px-3 py-2">2029-10-01 14:00</td>
+                    <td class="px-3 py-2">
+                      <div class="flex items-center gap-3">
+                        <button class="text-primary text-xs hover:underline edit-btn" data-id="1">编辑</button>
+                        <button class="text-danger text-xs hover:underline delete-btn" data-id="1">删除</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <!-- 分页 -->
+            <div class="flex flex-wrap items-center justify-between gap-4 p-3 bg-neutral-50 border-t border-neutral-200">
+              <div class="text-sm text-neutral-500">显示 1-3 条，共 3 条</div>
+              <div class="flex items-center">
+                <button class="w-8 h-8 flex items-center justify-center rounded border border-neutral-200 text-neutral-400 bg-white hover:border-primary hover:text-primary mr-1 disabled:opacity-30 disabled:cursor-not-allowed" disabled>
+                  <i class="fa fa-angle-left"></i>
+                </button>
+                <button class="w-8 h-8 flex items-center justify-center rounded border border-primary text-white bg-primary mr-1">1</button>
+                <button class="w-8 h-8 flex items-center justify-center rounded border border-neutral-200 text-neutral-400 bg-white hover:border-primary hover:text-primary mr-1 disabled:opacity-30 disabled:cursor-not-allowed" disabled>
+                  <i class="fa fa-angle-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- 联系我们按钮 -->
+  <div class="fixed bottom-6 right-6 z-50">
+    <!-- 联系我们按钮 -->
+    <button id="contact-us-button" class="bg-primary hover:bg-primary-light text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+      <i class="fa fa-envelope text-xl"></i>
+    </button>
+    
+    <!-- 联系方式弹窗 -->
+    <div id="contact-modal" class="hidden absolute bottom-20 right-0 w-64 bg-white rounded-xl shadow-lg border border-border p-4 opacity-0 scale-95 transition-all duration-300">
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="font-bold text-primary">联系方式</h4>
+        <button id="close-contact-modal" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-3">
+        <div class="flex items-center">
+          <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+            <i class="fa fa-phone"></i>
+          </div>
+          <span class="text-sm">400-123-4567</span>
+        </div>
+        <div class="flex items-center">
+          <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+            <i class="fa fa-envelope-o"></i>
+          </div>
+          <span class="text-sm">contact@elsa.com</span>
+        </div>
+        <div class="flex items-center">
+          <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+            <i class="fa fa-weixin"></i>
+          </div>
+          <span class="text-sm">ELSA_official</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 子账号编辑/创建模态框 -->
+  <div id="subaccount-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl shadow-lg border border-border w-full max-w-2xl max-h-[90vh] overflow-y-auto scale-fade-in">
+      <div class="p-6 border-b border-border flex justify-between items-center">
+        <h3 id="modal-title" class="text-xl font-bold text-dark">创建子账号</h3>
+        <button id="close-modal" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <form id="subaccount-form" class="p-6 space-y-6">
+        <input type="hidden" id="account-id" value="">
+        
+        <!-- 基本信息 -->
+        <div>
+          <h4 class="font-medium text-gray-700 mb-4">基本信息</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="form-label" for="account-name">昵称 <span class="text-danger">*</span></label>
+              <input type="text" id="account-name" class="input-primary" placeholder="请输入昵称" required>
+            </div>
+            <div>
+              <label class="form-label" for="display-name">用户名<span class="text-danger">*</span></label>
+              <input type="text" id="display-name" class="input-primary" placeholder="请输入用户名" required>
+            </div>
+            <div>
+              <label class="form-label" for="email">邮箱 <span class="text-danger">*</span></label>
+              <input type="email" id="email" class="input-primary" placeholder="请输入邮箱地址" required>
+            </div>
+            <div>
+              <label class="form-label" for="phone">手机号码 <span class="text-danger">*</span></label>
+              <input type="tel" id="phone" class="input-primary" placeholder="请输入手机号码" required>
+            </div>
+            <div>
+              <label class="form-label" for="gender">性别</label>
+              <select id="gender" class="input-primary">
+                <option value="male">男</option>
+                <option value="female">女</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" for="password">密码 <span class="text-danger">*</span></label>
+              <input type="password" id="password" class="input-primary" placeholder="密码长度8-20位，包含字母和数字" required>
+            </div>
+            <div>
+          </div>
+        </div>
+        
+        <!-- 权限设置 -->
+        <div>
+          <h4 class="font-medium text-gray-700 mb-4">权限设置</h4>
+          <div class="space-y-3">
+            <div class="flex items-center">
+              <input type="radio" id="role-admin" name="role" value="admin" class="w-4 h-4 text-primary border-gray-300 focus:ring-primary/30 mr-2">
+              <label for="role-admin" class="text-gray-700">所有</label>
+            </div>
+            <div class="flex items-center">
+              <input type="radio" id="role-operator" name="role" value="operator" class="w-4 h-4 text-primary border-gray-300 focus:ring-primary/30 mr-2" checked>
+              <label for="role-operator" class="text-gray-700">指定权限</label>
+            </div>
+            
+            <!-- 操作员细粒度权限 -->
+            <div id="operator-permissions" class="pl-6 space-y-3 border-l border-gray-200">
+              <div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                  <div class="flex items-center">
+                    <input type="checkbox" id="perm-inventory" name="permissions" value="inventory" class="checkbox-primary mr-2">
+                    <label for="perm-inventory">库存管理</label>
+                  </div>
+                  <div class="flex items-center">
+                    <input type="checkbox" id="perm-order" name="permissions" value="order" class="checkbox-primary mr-2">
+                    <label for="perm-order">订单管理</label>
+                  </div>
+                  <div class="flex items-center">
+                    <input type="checkbox" id="perm-report" name="permissions" value="report" class="checkbox-primary mr-2">
+                    <label for="perm-report">报表查看</label>
+                  </div>
+                  <div class="flex items-center">
+                    <input type="checkbox" id="perm-settings" name="permissions" value="settings" class="checkbox-primary mr-2">
+                    <label for="perm-settings">系统设置</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 仓库分配 -->
+        <div>
+          <h4 class="font-medium text-gray-700 mb-4">仓库分配 <span class="text-danger">*</span></h4>
+          <div class="space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
+              <div class="flex items-center">
+                <input type="checkbox" id="warehouse-1" name="warehouses" value="1" class="checkbox-primary mr-2" required>
+                <label for="warehouse-1">上海仓库</label>
+              </div>
+              <div class="flex items-center">
+                <input type="checkbox" id="warehouse-2" name="warehouses" value="2" class="checkbox-primary mr-2">
+                <label for="warehouse-2">北京仓库</label>
+              </div>
+              <div class="flex items-center">
+                <input type="checkbox" id="warehouse-3" name="warehouses" value="3" class="checkbox-primary mr-2">
+                <label for="warehouse-3">广州仓库</label>
+              </div>
+              <div class="flex items-center">
+                <input type="checkbox" id="warehouse-4" name="warehouses" value="4" class="checkbox-primary mr-2">
+                <label for="warehouse-4">深圳仓库</label>
+              </div>
+              <div class="flex items-center">
+                <input type="checkbox" id="warehouse-5" name="warehouses" value="5" class="checkbox-primary mr-2">
+                <label for="warehouse-5">成都仓库</label>
+              </div>
+              <div class="flex items-center">
+                <input type="checkbox" id="warehouse-6" name="warehouses" value="6" class="checkbox-primary mr-2">
+                <label for="warehouse-6">武汉仓库</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="flex justify-end gap-3 pt-4 border-t border-border">
+          <button type="button" id="cancel-btn" class="btn-secondary">取消</button>
+          <button type="submit" class="btn-primary">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 删除确认模态框 -->
+  <div id="delete-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl shadow-lg border border-border w-full max-w-md scale-fade-in">
+      <div class="p-6 border-b border-border">
+        <h3 class="text-xl font-bold text-dark">确认删除</h3>
+      </div>
+      <div class="p-6">
+        <p class="text-gray-700 mb-6">您确定要删除该子账号吗？此操作无法撤销。</p>
+        <div class="flex justify-end gap-3">
+          <button id="cancel-delete" class="btn-secondary">取消</button>
+          <button id="confirm-delete" class="btn-danger">删除</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 成功提示模态框 -->
+  <div id="success-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl shadow-lg border border-border w-full max-w-md scale-fade-in">
+      <div class="p-6 text-center">
+        <div class="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center text-success mx-auto mb-4">
+          <i class="fa fa-check text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-dark mb-2">操作成功</h3>
+        <p id="success-message" class="text-gray-700 mb-6">子账号创建成功</p>
+        <button id="success-confirm" class="btn-primary w-full">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 设置当前日期
+      const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+      const currentDate = new Date().toLocaleDateString('zh-CN', dateOptions);
+      if (document.getElementById('current-date')) {
+        document.getElementById('current-date').textContent = currentDate;
+      }
+      
+      // 用户下拉菜单控制
+      const userButton = document.querySelector('.group button');
+      const userDropdown = document.getElementById('user-dropdown');
+      
+      if (userButton && userDropdown) {
+        userButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          userDropdown.classList.toggle('hidden');
+        });
+        
+        document.addEventListener('click', (e) => {
+          if (!userButton.contains(e.target) && !userDropdown.contains(e.target)) {
+            userDropdown.classList.add('hidden');
+          }
+        });
+      }
+      
+      // 系统数据（用于搜索功能）
+      const systems = [
+        { name: '电商管理系统', category: '业务系统', url: '#' },
+        { name: '财务管理系统', category: '业务系统', url: '#' },
+        { name: '客户关系管理', category: '业务系统', url: '#' },
+        { name: '人力资源系统', category: '管理系统', url: '#' },
+        { name: '权限管理系统', category: '管理系统', url: '#' },
+        { name: '数据可视化平台', category: '数据系统', url: '#' },
+        { name: '开发工具平台', category: '工具系统', url: '#' },
+        { name: '审批系统', category: '快捷入口', url: '#' },
+        { name: '日程安排', category: '快捷入口', url: '#' },
+        { name: '邮件系统', category: '快捷入口', url: '#' },
+        { name: '即时通讯', category: '快捷入口', url: '#' }
+      ];
+      
+      // 搜索功能实现
+      const searchInput = document.getElementById('system-search');
+      const searchResults = document.getElementById('search-results');
+      
+      if (searchInput && searchResults) {
+        searchInput.addEventListener('input', function() {
+          const searchTerm = this.value.trim().toLowerCase();
+          
+          if (searchTerm.length === 0) {
+            searchResults.classList.add('hidden');
+            return;
+          }
+          
+          const filteredSystems = systems.filter(system => 
+            system.name.toLowerCase().includes(searchTerm) || 
+            system.category.toLowerCase().includes(searchTerm)
+          );
+          
+          if (filteredSystems.length > 0) {
+            searchResults.innerHTML = '';
+            filteredSystems.forEach(system => {
+              const resultItem = document.createElement('div');
+              resultItem.className = 'px-4 py-3 hover:bg-gray-50 flex justify-between items-center cursor-pointer transition-colors';
+              resultItem.innerHTML = `
+                <div>
+                  <div class="font-medium">${system.name}</div>
+                  <div class="text-xs text-gray-500">${system.category}</div>
+                </div>
+                <i class="fa fa-angle-right text-gray-400"></i>
+              `;
+              
+              resultItem.addEventListener('click', function() {
+                window.location.href = system.url;
+              });
+              
+              searchResults.appendChild(resultItem);
+            });
+            
+            searchResults.classList.remove('hidden');
+          } else {
+            searchResults.innerHTML = '<div class="px-4 py-3 text-gray-500">未找到相关系统</div>';
+            searchResults.classList.remove('hidden');
+          }
+        });
+        
+        // 点击页面其他地方关闭搜索结果
+        document.addEventListener('click', function(event) {
+          if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+            searchResults.classList.add('hidden');
+          }
+        });
+      }
+      
+      // 联系我们按钮交互
+      const contactUsButton = document.getElementById('contact-us-button');
+      const contactModal = document.getElementById('contact-modal');
+      const closeContactModal = document.getElementById('close-contact-modal');
+      
+      // 浮动按钮交互 - 逻辑说明和版本记录
+      const floatingBtns = document.querySelectorAll('.floating-btn');
+      const modalOverlays = document.querySelectorAll('.modal-overlay');
+      const closeBtns = document.querySelectorAll('.close-btn');
+      
+      // 切换弹窗显示/隐藏
+      function toggleContactModal() {
+        contactModal.classList.toggle('hidden');
+        if (!contactModal.classList.contains('hidden')) {
+          // 显示动画
+          setTimeout(() => {
+            contactModal.classList.add('opacity-100', 'scale-100');
+            contactModal.classList.remove('opacity-0', 'scale-95');
+          }, 10);
+        } else {
+          // 隐藏动画
+          contactModal.classList.add('opacity-0', 'scale-95');
+          contactModal.classList.remove('opacity-100', 'scale-100');
+        }
+      }
+      
+      // 点击联系我们按钮
+      if (contactUsButton) {
+        contactUsButton.addEventListener('click', function(e) {
+          e.stopPropagation();
+          // 添加点击动画效果
+          this.classList.add('scale-90');
+          setTimeout(() => {
+            this.classList.remove('scale-90');
+          }, 200);
+          
+          toggleContactModal();
+        });
+      }
+      
+      // 点击关闭按钮
+      if (closeContactModal) {
+        closeContactModal.addEventListener('click', function(e) {
+          e.stopPropagation();
+          toggleContactModal();
+        });
+      }
+      
+      // 点击页面其他地方关闭弹窗
+      document.addEventListener('click', function(e) {
+        if (contactModal && !contactModal.classList.contains('hidden') && 
+            !contactUsButton.contains(e.target) && !contactModal.contains(e.target)) {
+          toggleContactModal();
+        }
+      });
+      
+      // 浮动按钮点击事件 - 显示对应模态框
+      floatingBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const modalId = this.getAttribute('data-modal-id');
+          const targetModal = document.getElementById(modalId);
+          
+          if (targetModal) {
+            targetModal.classList.add('show');
+            document.body.style.overflow = 'hidden'; // 防止背景滚动
+          }
+        });
+      });
+      
+      // 关闭按钮点击事件 - 隐藏模态框
+      closeBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          const modal = this.closest('.modal-overlay');
+          if (modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = ''; // 恢复背景滚动
+          }
+        });
+      });
+      
+      // 点击模态框外部关闭
+      modalOverlays.forEach(modal => {
+        modal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            this.classList.remove('show');
+            document.body.style.overflow = '';
+          }
+        });
+      });
+      
+      // ESC键关闭模态框
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          modalOverlays.forEach(modal => {
+            if (modal.classList.contains('show')) {
+              modal.classList.remove('show');
+              document.body.style.overflow = '';
+            }
+          });
+        }
+      });
+      
+      // 子账号管理相关功能
+      
+      // 模态框元素
+      const subaccountModal = document.getElementById('subaccount-modal');
+      const deleteModal = document.getElementById('delete-modal');
+      const successModal = document.getElementById('success-modal');
+      const modalTitle = document.getElementById('modal-title');
+      const accountIdInput = document.getElementById('account-id');
+      const successMessage = document.getElementById('success-message');
+      
+      // 当前正在操作的子账号ID
+      let currentSubaccountId = null;
+      
+      // 打开创建子账号模态框
+      document.getElementById('add-subaccount-btn').addEventListener('click', function() {
+        // 重置表单
+        document.getElementById('subaccount-form').reset();
+        // 设置为创建模式
+        modalTitle.textContent = '创建子账号';
+        accountIdInput.value = '';
+        // 选中操作员角色
+        document.getElementById('role-operator').checked = true;
+        toggleOperatorPermissions();
+        // 显示模态框
+        subaccountModal.classList.remove('hidden');
+      });
+      
+      // 编辑子账号
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          currentSubaccountId = id;
+          
+          // 设置为编辑模式
+            modalTitle.textContent = '编辑子账号';
+            accountIdInput.value = id;
+          
+          // 填充表单数据 (示例数据)
+          if (id === '1') {
+            document.getElementById('account-name').value = 'zhangsan';
+            document.getElementById('display-name').value = '张三';
+            document.getElementById('email').value = 'zhangsan@example.com';
+            document.getElementById('phone').value = '138****1234';
+            document.getElementById('role-admin').checked = true;
+            document.getElementById('warehouse-1').checked = true;
+            document.getElementById('warehouse-2').checked = true;
+          } else if (id === '2') {
+            document.getElementById('account-name').value = 'lisi';
+            document.getElementById('display-name').value = '李四';
+            document.getElementById('email').value = 'lisi@example.com';
+            document.getElementById('phone').value = '139****5678';
+            document.getElementById('role-operator').checked = true;
+            document.getElementById('warehouse-3').checked = true;
+          } else if (id === '3') {
+            document.getElementById('account-name').value = 'wangwu';
+            document.getElementById('display-name').value = '王五';
+            document.getElementById('email').value = 'wangwu@example.com';
+            document.getElementById('phone').value = '137****9012';
+            document.getElementById('role-operator').checked = true;
+            document.getElementById('warehouse-4').checked = true;
+          }
+          
+          toggleOperatorPermissions();
+          // 显示模态框
+          subaccountModal.classList.remove('hidden');
+        });
+      });
+      
+      // 删除子账号
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          currentSubaccountId = this.getAttribute('data-id');
+          deleteModal.classList.remove('hidden');
+        });
+      });
+      
+      // 确认删除
+      document.getElementById('confirm-delete').addEventListener('click', function() {
+        // 模拟删除操作
+        console.log('删除子账号:', currentSubaccountId);
+        
+        // 隐藏删除确认框
+        deleteModal.classList.add('hidden');
+        
+        // 显示成功提示
+        successMessage.textContent = '子账号删除成功';
+        successModal.classList.remove('hidden');
+        
+        // 实际应用中这里应该有AJAX调用来执行删除操作，然后刷新列表
+      });
+      
+      // 切换子账号状态
+      document.querySelectorAll('.toggle-status-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.getAttribute('data-id');
+          const icon = this.querySelector('i');
+          
+          // 切换状态图标
+          if (icon.classList.contains('fa-toggle-on')) {
+            icon.classList.remove('fa-toggle-on');
+            icon.classList.add('fa-toggle-off');
+            this.classList.remove('text-warning', 'hover:text-warning/80');
+            this.classList.add('text-gray-400', 'hover:text-gray-600');
+            
+            // 更新表格中的状态
+            const row = this.closest('tr');
+            const statusCell = row.querySelector('td:nth-child(7)');
+            statusCell.innerHTML = `
+              <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded">
+                <span class="w-2 h-2 bg-gray-400 rounded-full mr-1"></span> 停用
+              </span>
+            `;
+            
+            // 显示成功提示
+            successMessage.textContent = '子账号停用';
+          } else {
+            icon.classList.remove('fa-toggle-off');
+            icon.classList.add('fa-toggle-on');
+            this.classList.remove('text-gray-400', 'hover:text-gray-600');
+            this.classList.add('text-warning', 'hover:text-warning/80');
+            
+            // 更新表格中的状态
+            const row = this.closest('tr');
+            const statusCell = row.querySelector('td:nth-child(7)');
+            statusCell.innerHTML = `
+              <span class="inline-flex items-center px-2 py-1 bg-success/10 text-success text-xs rounded">
+                <span class="w-2 h-2 bg-success rounded-full mr-1"></span> 启用
+              </span>
+            `;
+            
+            // 显示成功提示
+            successMessage.textContent = '子账号启用';
+          }
+          
+          successModal.classList.remove('hidden');
+        });
+      });
+      
+      // 关闭模态框
+      document.getElementById('close-modal').addEventListener('click', function() {
+        subaccountModal.classList.add('hidden');
+      });
+      
+      document.getElementById('cancel-btn').addEventListener('click', function() {
+        subaccountModal.classList.add('hidden');
+      });
+      
+      document.getElementById('cancel-delete').addEventListener('click', function() {
+        deleteModal.classList.add('hidden');
+      });
+      
+      document.getElementById('success-confirm').addEventListener('click', function() {
+        successModal.classList.add('hidden');
+      });
+      
+      // 角色切换时控制权限选项显示
+      document.getElementById('role-admin').addEventListener('change', toggleOperatorPermissions);
+      document.getElementById('role-operator').addEventListener('change', toggleOperatorPermissions);
+      
+      function toggleOperatorPermissions() {
+        const operatorPermissions = document.getElementById('operator-permissions');
+        const isOperator = document.getElementById('role-operator').checked;
+        
+        if (isOperator) {
+          operatorPermissions.style.display = 'block';
+        } else {
+          operatorPermissions.style.display = 'none';
+        }
+      }
+      
+      // 表单提交处理
+      document.getElementById('subaccount-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // 表单验证
+        const accountName = document.getElementById('account-name').value;
+        const displayName = document.getElementById('display-name').value;
+        const email = document.getElementById('email').value;
+        const phone = document.getElementById('phone').value;
+        
+        if (!accountName || !displayName || !email || !phone) {
+          alert('请填写所有必填字段');
+          return;
+        }
+        
+        // 收集选中的仓库
+        const selectedWarehouses = Array.from(document.querySelectorAll('input[name="warehouses"]:checked'))
+          .map(el => el.value);
+        
+        if (selectedWarehouses.length === 0) {
+          alert('请至少选择一个仓库');
+          return;
+        }
+        
+        // 收集权限
+        const role = document.querySelector('input[name="role"]:checked').value;
+        const permissions = role === 'operator' ? 
+          Array.from(document.querySelectorAll('input[name="permissions"]:checked'))
+            .map(el => el.value) : [];
+        
+        // 构建提交数据
+        const formData = {
+          id: accountIdInput.value,
+          accountName,
+          displayName,
+          email,
+          phone,
+          role,
+          permissions,
+          warehouses: selectedWarehouses
+        };
+        
+        // 如果是创建，还需要密码
+        if (!accountIdInput.value) {
+          const password = document.getElementById('password').value;
+          const confirmPassword = document.getElementById('confirm-password').value;
+          
+          if (!password || !confirmPassword) {
+            alert('请设置密码');
+            return;
+          }
+          
+          if (password !== confirmPassword) {
+            alert('两次输入的密码不一致');
+            return;
+          }
+          
+          if (password.length < 8 || password.length > 20 || !/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/.test(password)) {
+            alert('密码长度8-20位，必须包含字母和数字');
+            return;
+          }
+          
+          formData.password = password;
+        }
+        
+        console.log('提交的数据:', formData);
+        
+        // 隐藏模态框
+        subaccountModal.classList.add('hidden');
+        
+        // 显示成功提示
+        successMessage.textContent = accountIdInput.value ? '子账号更新成功' : '子账号创建成功';
+        successModal.classList.remove('hidden');
+        
+        // 实际应用中这里应该有AJAX调用来保存数据，然后刷新列表
+      });
+      
+      // 子账号搜索
+      const subaccountSearch = document.getElementById('subaccount-search');
+      const subaccountList = document.getElementById('subaccount-list');
+      
+      if (subaccountSearch && subaccountList) {
+        subaccountSearch.addEventListener('input', function() {
+          const searchTerm = this.value.trim().toLowerCase();
+          const rows = subaccountList.querySelectorAll('tr');
+          
+          rows.forEach(row => {
+            const accountName = row.querySelector('td:first-child').textContent.toLowerCase();
+            const email = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            
+            if (accountName.includes(searchTerm) || email.includes(searchTerm)) {
+              row.style.display = '';
+            } else {
+              row.style.display = 'none';
+            }
+          });
+        });
+      }
+      
+      // 状态筛选
+      const statusFilter = document.getElementById('status-filter');
+      
+      if (statusFilter && subaccountList) {
+        statusFilter.addEventListener('change', function() {
+          const status = this.value;
+          const rows = subaccountList.querySelectorAll('tr');
+          
+          rows.forEach(row => {
+            const statusCell = row.querySelector('td:nth-child(7)');
+            const isActive = statusCell.querySelector('.bg-success/10') !== null;
+            
+            if (status === '' || (status === 'active' && isActive) || (status === 'inactive' && !isActive)) {
+              row.style.display = '';
+            } else {
+              row.style.display = 'none';
+            }
+          });
+        });
+      }
+    });
+  </script>
+</body>
+</html>
