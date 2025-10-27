@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELSA统一门户</title>
+  <!-- 引入外部资源 -->
+  <!-- 优化CDN加载 -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdn.tailwindcss.com">
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2a3b7d',
+            'primary-light': '#3a4ca7',
+            secondary: '#36CFC9',
+            accent: '#722ED1',
+            success: '#00B42A',
+            warning: '#FF7D00',
+            danger: '#F53F3F',
+            dark: '#1D2129',
+            'light-bg': '#FFFFFF',
+            'card-bg': '#FFFFFF',
+            border: '#E5E7EB'  // 修复类名问题，使用标准的border而不是border-color
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            'card': '0 2px 8px rgba(0, 0, 0, 0.05)',
+            'card-hover': '0 10px 25px -5px rgba(42, 59, 125, 0.1)',
+            'dropdown': '0 4px 16px rgba(0, 0, 0, 0.1)',
+            'header': '0 2px 4px rgba(0, 0, 0, 0.05)'
+          },
+          transitionTimingFunction: {
+            'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)'
+          }
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .text-shadow-sm {
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      }
+      .welcome-gradient {
+        background: linear-gradient(135deg, #2a3b7d 0%, #4158a1 100%);
+      }
+      .card-hover-lift {
+        transform: translateY(0);
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+      }
+      .card-hover-lift:hover {
+        transform: translateY(-4px);
+      }
+      .btn-primary {
+        @apply bg-primary text-white px-4 py-2 rounded-lg transition-all hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2;
+      }
+      .btn-secondary {
+        @apply bg-white text-primary border border-border px-4 py-2 rounded-lg transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2;
+      }
+      .input-primary {
+        @apply w-full px-4 py-2.5 rounded-lg border border-border bg-white text-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all;
+      }
+      .scroll-smooth {
+        scroll-behavior: smooth;
+      }
+      .help-widget-transition {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .scale-fade-in {
+        animation: scaleFadeIn 0.3s ease-out forwards;
+      }
+      @keyframes scaleFadeIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .scale-fade-out {
+        animation: scaleFadeOut 0.2s ease-in forwards;
+      }
+      @keyframes scaleFadeOut {
+        0% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+      }
+    }
+  </style>
+</head>
+
+<body class="font-inter bg-gray-50 text-dark min-h-screen flex flex-col scroll-smooth">
+  <!-- 顶部导航栏 -->
+  <header class="bg-white text-dark sticky top-0 z-40 shadow-header border-b border-border">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-16 lg:h-20">
+        <!-- 左侧Logo和标题 -->
+        <div class="flex items-center space-x-4">
+          <button id="sidebar-toggle" class="lg:hidden text-dark p-2 rounded-md hover:bg-gray-100 transition-colors">
+            <i class="fa fa-bars text-xl"></i>
+          </button>
+          <!-- Logo图片 -->
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='28' viewBox='0 0 110 28'%3E%3Ctext x='0' y='18' font-family='Arial, sans-serif' font-size='11' font-weight='bold' fill='%232563eb'%3E链仓科技%3C/text%3E%3Ctext x='45' y='18' font-family='Arial, sans-serif' font-size='9' font-weight='bold' fill='%23666'%3EDISCOVERY%3C/text%3E%3C/svg%3E" alt="链仓科技Logo" class="h-7">
+          <h1 class="text-xl font-bold text-dark hidden sm:block">ELSA统一门户</h1>
+        </div>
+        
+        <!-- 中间搜索框 -->
+        <div class="hidden md:flex relative flex-1 max-w-xl mx-6 lg:mx-8">
+          <input type="text" placeholder="搜索系统..." id="system-search"
+            class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 bg-white text-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+          >
+          <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <!-- 搜索结果下拉框 -->
+          <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-dropdown overflow-hidden z-50 max-h-80 overflow-y-auto">
+            <!-- 搜索结果会通过JS动态生成 -->
+          </div>
+        </div>
+        
+        <!-- 右侧用户区域 -->
+        <div class="flex items-center space-x-3 lg:space-x-5">
+          <!-- 操作手册按钮 -->
+          <button class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+            <i class="fa fa-book text-primary font-bold italic"></i> <span class="text-primary font-bold italic">操作手册</span>
+          </button>
+          <button class="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
+            <i class="fa fa-bell-o text-dark"></i>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full animate-pulse"></span>
+          </button>
+          <div class="relative group">
+            <button class="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100 transition-colors">
+              <span class="text-dark text-sm font-medium hidden md:block">zsw</span>
+              <i class="fa fa-angle-down text-dark text-xs hidden md:block"></i>
+            </button>
+            <!-- 用户下拉菜单 -->
+            <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-dropdown border border-border py-2 z-50 scale-fade-in hidden">
+              <a href="#" class="block px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
+                <i class="fa fa-user-o mr-2 text-primary"></i> 个人信息
+              </a>
+              <a href="subaccount.html" class="block px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
+                <i class="fa fa-cog mr-2 text-primary"></i> 子账号管理
+              </a>
+              <a href="#" class="block px-4 py-2 text-sm text-dark hover:bg-gray-50 transition-colors">
+                <i class="fa fa-cog mr-2 text-primary"></i> 第三方账号管理
+              </a>
+              <div class="border-t border-border my-1"></div>
+              <a href="#" class="block px-4 py-2 text-sm text-danger hover:bg-gray-50 transition-colors">
+                <i class="fa fa-sign-out mr-2"></i> 退出登录
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <div class="flex flex-1 overflow-hidden">
+    <!-- 主内容 -->
+    <main class="flex-1 overflow-y-auto bg-gray-50">
+      <div class="container mx-auto px-4 py-6">
+      <!-- 移动端搜索框 -->
+      <div class="md:hidden relative mb-6">
+        <input type="text" placeholder="搜索系统..."
+          class="input-primary"
+        >
+        <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+      </div>
+      
+      <!-- 欢迎区域 - 优化后的样式 -->
+      <div class="mb-8 welcome-gradient rounded-2xl p-6 lg:p-8 text-white relative overflow-hidden shadow-welcome">
+        <!-- 装饰元素 -->
+        <div class="absolute right-0 top-0 opacity-10">
+          <i class="fa fa-cubes text-[200px] transform translate-x-1/3 -translate-y-1/3"></i>
+        </div>
+        <div class="absolute left-1/4 bottom-0 opacity-5">
+          <i class="fa fa-server text-[150px]"></i>
+        </div>
+        
+        <div class="relative z-10">
+          <h2 class="text-[clamp(1.5rem,3vw,2.25rem)] font-bold mb-3 text-white text-shadow">欢迎回来，zsw</h2>
+          <p class="text-white opacity-100 max-w-lg mb-6 text-shadow-sm">今天是 <span id="current-date" class="font-medium text-white">2023年10月15日 星期日</span></p>
+
+        </div>
+      </div>
+      
+      <!-- 快捷入口 -->
+      <div class="mb-8">
+        <div class="flex items-center justify-between mb-5">
+          <h3 class="text-lg font-bold text-dark">快捷入口</h3>
+          <!-- <a href="#" class="text-primary text-sm hover:underline flex items-center transition-all">
+            更多 <i class="fa fa-angle-right ml-1"></i>
+          </a> -->
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          <a href="#" class="bg-card-bg rounded-xl p-4 flex flex-col items-center justify-center text-center card-hover-lift shadow-card border border-border w-full">
+            <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2 transform transition-transform hover:scale-110">
+              <i class="fa fa-file-text-o text-xl"></i>
+            </div>
+            <span class="text-sm font-medium">入库预报</span>
+          </a>
+          <a href="#" class="bg-card-bg rounded-xl p-4 flex flex-col items-center justify-center text-center card-hover-lift shadow-card border border-border w-full">
+            <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2 transform transition-transform hover:scale-110">
+              <i class="fa fa-calendar-o text-xl"></i>
+            </div>
+            <span class="text-sm font-medium">出库管理</span>
+          </a>
+          <a href="#" class="bg-card-bg rounded-xl p-4 flex flex-col items-center justify-center text-center card-hover-lift shadow-card border border-border w-full">
+            <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2 transform transition-transform hover:scale-110">
+              <i class="fa fa-envelope-o text-xl"></i>
+            </div>
+            <span class="text-sm font-medium">售后工单</span>
+          </a>
+          <a href="#" class="bg-card-bg rounded-xl p-4 flex flex-col items-center justify-center text-center card-hover-lift shadow-card border border-border w-full">
+            <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2 transform transition-transform hover:scale-110">
+              <i class="fa fa-comments-o text-xl"></i>
+            </div>
+            <span class="text-sm font-medium">轨迹查询</span>
+          </a>
+        </div>
+      </div>
+      
+      <!-- 系统列表区域 -->
+      <div class="space-y-8">
+        <!-- 业务系统 -->
+        <div id="business">
+          <div class="flex items-center mb-5">
+            <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mr-2">
+              <i class="fa fa-briefcase"></i>
+            </div>
+            <h3 class="text-lg font-bold text-dark">业务系统</h3>
+          </div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- 系统卡片1 -->
+            <a href="#" class="block bg-card-bg rounded-xl overflow-hidden shadow-card border border-border card-hover-lift group w-full">
+              <div class="p-5">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <i class="fa fa-shopping-cart text-xl"></i>
+                  </div>
+                  <!-- 原星标按钮已删除 -->
+                </div>
+                <h4 class="font-bold text-dark mb-1 text-base">ELSA</h4>
+                <p class="text-gray-500 text-sm mb-4">这是一段系统描述</p>
+              </div>
+              
+              
+            </a>
+            
+            <!-- 系统卡片2 -->
+            <a href="#" class="block bg-card-bg rounded-xl overflow-hidden shadow-card border border-border card-hover-lift group w-full">
+              <div class="p-5">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <i class="fa fa-credit-card text-xl"></i>
+                  </div>
+                  <!-- 原星标按钮已删除 -->
+                </div>
+                <h4 class="font-bold text-dark mb-1 text-base">ELSA</h4>
+                <p class="text-gray-500 text-sm mb-4">这是一段系统描述</p>
+              </div>
+              
+            </a>
+            
+            <!-- 系统卡片3 -->
+            <a href="#" class="block bg-card-bg rounded-xl overflow-hidden shadow-card border border-border card-hover-lift group w-full">
+              <div class="p-5">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <i class="fa fa-users text-xl"></i>
+                  </div>
+                  <!-- 原星标按钮已删除 -->
+                </div>
+                <h4 class="font-bold text-dark mb-1 text-base">ELSA</h4>
+                <p class="text-gray-500 text-sm mb-4">这是一段系统描述</p>
+              </div>
+              
+            </a>
+          </div>
+        </div>
+        
+        <!-- 管理系统 -->
+        <div id="manage">
+          <div class="flex items-center mb-5">
+            <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mr-2">
+              <i class="fa fa-cogs"></i>
+            </div>
+            <h3 class="text-lg font-bold text-dark">管理系统</h3>
+          </div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- 系统卡片4 -->
+            <a href="#" class="block bg-card-bg rounded-xl overflow-hidden shadow-card border border-border card-hover-lift group w-full">
+              <div class="p-5">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <i class="fa fa-user-circle-o text-xl"></i>
+                  </div>
+                  <!-- 原星标按钮已删除 -->
+                </div>
+                <h4 class="font-bold text-dark mb-1 text-base">ELSA</h4>
+                <p class="text-gray-500 text-sm mb-4">这是一段系统描述</p>
+              </div>
+              
+            </a>
+            
+            <!-- 系统卡片5 -->
+            <a href="#" class="block bg-card-bg rounded-xl overflow-hidden shadow-card border border-border card-hover-lift group w-full">
+              <div class="p-5">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <i class="fa fa-shield text-xl"></i>
+                  </div>
+                  <!-- 原星标按钮已删除 -->
+                </div>
+                <h4 class="font-bold text-dark mb-1 text-base">ELSA</h4>
+                <p class="text-gray-500 text-sm mb-4">这是一段系统描述</p>
+              </div>
+              
+            </a>
+          </div>
+        </div>
+        
+        <!-- 数据系统 -->
+        <div id="data">
+          <div class="flex items-center mb-5">
+            <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mr-2">
+              <i class="fa fa-database"></i>
+            </div>
+            <h3 class="text-lg font-bold text-dark">数据系统</h3>
+          </div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- 系统卡片6 -->
+            <a href="#" class="block bg-card-bg rounded-xl overflow-hidden shadow-card border border-border card-hover-lift group w-full">
+              <div class="p-5">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <i class="fa fa-line-chart text-xl"></i>
+                  </div>
+                  <!-- 原星标按钮已删除 -->
+                </div>
+                <h4 class="font-bold text-dark mb-1 text-base">ELSA</h4>
+                <p class="text-gray-500 text-sm mb-4">这是一段系统描述</p>
+              </div>
+            </a>
+          </div>
+        </div>
+        
+        <!-- 工具系统 -->
+        <div id="tools">
+          <div class="flex items-center mb-5">
+            <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mr-2">
+              <i class="fa fa-wrench"></i>
+            </div>
+            <h3 class="text-lg font-bold text-dark">工具系统</h3>
+          </div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- 系统卡片7 -->
+            <a href="#" class="block bg-card-bg rounded-xl overflow-hidden shadow-card border border-border card-hover-lift group w-full">
+              <div class="p-5">
+                <div class="flex items-start justify-between mb-4">
+                  <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                    <i class="fa fa-line-chart text-xl"></i>
+                  </div>
+                  <!-- 原星标按钮已删除 -->
+                </div>
+                <h4 class="font-bold text-dark mb-1 text-base">ELSA</h4>
+                <p class="text-gray-500 text-sm mb-4">这是一段系统描述</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- 联系我们按钮 -->
+<div class="fixed bottom-6 right-6 z-50">
+  <!-- 联系我们按钮 -->
+  <button id="contact-us-button" class="bg-primary hover:bg-primary-light text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+    <i class="fa fa-envelope text-xl"></i>
+  </button>
+  
+  <!-- 联系方式弹窗 -->
+  <div id="contact-modal" class="hidden absolute bottom-20 right-0 w-64 bg-white rounded-xl shadow-lg border border-border p-4 opacity-0 scale-95 transition-all duration-300">
+    <div class="flex justify-between items-center mb-3">
+      <h4 class="font-bold text-primary">联系方式</h4>
+      <button id="close-contact-modal" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <i class="fa fa-times"></i>
+      </button>
+    </div>
+    <div class="space-y-3">
+      <div class="flex items-center">
+        <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+          <i class="fa fa-phone"></i>
+        </div>
+        <span class="text-sm">400-123-4567</span>
+      </div>
+      <div class="flex items-center">
+        <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+          <i class="fa fa-envelope-o"></i>
+        </div>
+        <span class="text-sm">contact@elsa.com</span>
+      </div>
+      <div class="flex items-center">
+        <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+          <i class="fa fa-weixin"></i>
+        </div>
+        <span class="text-sm">ELSA_official</span>
+      </div>
+    </div>
+  </div>
+</div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 设置当前日期
+      const dateOptions = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+      const currentDate = new Date().toLocaleDateString('zh-CN', dateOptions);
+      document.getElementById('current-date').textContent = currentDate;
+      
+      // 用户下拉菜单控制
+      const userButton = document.querySelector('.group button');
+      const userDropdown = document.getElementById('user-dropdown');
+      
+      userButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        userDropdown.classList.toggle('hidden');
+      });
+      
+      document.addEventListener('click', (e) => {
+        if (!userButton.contains(e.target) && !userDropdown.contains(e.target)) {
+          userDropdown.classList.add('hidden');
+        }
+      });
+      
+      // 系统数据（用于搜索功能）
+      const systems = [
+        { name: '电商管理系统', category: '业务系统', url: '#' },
+        { name: '财务管理系统', category: '业务系统', url: '#' },
+        { name: '客户关系管理', category: '业务系统', url: '#' },
+        { name: '人力资源系统', category: '管理系统', url: '#' },
+        { name: '权限管理系统', category: '管理系统', url: '#' },
+        { name: '数据可视化平台', category: '数据系统', url: '#' },
+        { name: '开发工具平台', category: '工具系统', url: '#' },
+        { name: '审批系统', category: '快捷入口', url: '#' },
+        { name: '日程安排', category: '快捷入口', url: '#' },
+        { name: '邮件系统', category: '快捷入口', url: '#' },
+        { name: '即时通讯', category: '快捷入口', url: '#' }
+      ];
+      
+      // 搜索功能实现
+      const searchInput = document.getElementById('system-search');
+      const searchResults = document.getElementById('search-results');
+      
+      if (searchInput && searchResults) {
+        searchInput.addEventListener('input', function() {
+          const searchTerm = this.value.trim().toLowerCase();
+          
+          if (searchTerm.length === 0) {
+            searchResults.classList.add('hidden');
+            return;
+          }
+          
+          const filteredSystems = systems.filter(system => 
+            system.name.toLowerCase().includes(searchTerm) || 
+            system.category.toLowerCase().includes(searchTerm)
+          );
+          
+          if (filteredSystems.length > 0) {
+            searchResults.innerHTML = '';
+            filteredSystems.forEach(system => {
+              const resultItem = document.createElement('div');
+              resultItem.className = 'px-4 py-3 hover:bg-gray-50 flex justify-between items-center cursor-pointer transition-colors';
+              resultItem.innerHTML = `
+                <div>
+                  <div class="font-medium">${system.name}</div>
+                  <div class="text-xs text-gray-500">${system.category}</div>
+                </div>
+                <i class="fa fa-angle-right text-gray-400"></i>
+              `;
+              
+              resultItem.addEventListener('click', function() {
+                window.location.href = system.url;
+              });
+              
+              searchResults.appendChild(resultItem);
+            });
+            
+            searchResults.classList.remove('hidden');
+          } else {
+            searchResults.innerHTML = '<div class="px-4 py-3 text-gray-500">未找到相关系统</div>';
+            searchResults.classList.remove('hidden');
+          }
+        });
+        
+        // 点击页面其他地方关闭搜索结果
+        document.addEventListener('click', function(event) {
+          if (!searchInput.contains(event.target) && !searchResults.contains(event.target)) {
+            searchResults.classList.add('hidden');
+          }
+        });
+      }
+      
+      // 联系我们按钮交互
+    const contactUsButton = document.getElementById('contact-us-button');
+    const contactModal = document.getElementById('contact-modal');
+    const closeContactModal = document.getElementById('close-contact-modal');
+    
+    // 切换弹窗显示/隐藏
+    function toggleContactModal() {
+      contactModal.classList.toggle('hidden');
+      if (!contactModal.classList.contains('hidden')) {
+        // 显示动画
+        setTimeout(() => {
+          contactModal.classList.add('opacity-100', 'scale-100');
+          contactModal.classList.remove('opacity-0', 'scale-95');
+        }, 10);
+      } else {
+        // 隐藏动画
+        contactModal.classList.add('opacity-0', 'scale-95');
+        contactModal.classList.remove('opacity-100', 'scale-100');
+      }
+    }
+    
+    // 点击联系我们按钮
+    if (contactUsButton) {
+      contactUsButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        // 添加点击动画效果
+        this.classList.add('scale-90');
+        setTimeout(() => {
+          this.classList.remove('scale-90');
+        }, 200);
+        
+        toggleContactModal();
+      });
+    }
+    
+    // 点击关闭按钮
+    if (closeContactModal) {
+      closeContactModal.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleContactModal();
+      });
+    }
+    
+    // 点击页面其他地方关闭弹窗
+    document.addEventListener('click', function(e) {
+      if (contactModal && !contactModal.classList.contains('hidden') && 
+          !contactUsButton.contains(e.target) && !contactModal.contains(e.target)) {
+        toggleContactModal();
+      }
+    });
+    
+    // 浮动帮助盒子功能
+    const helpWidget = document.getElementById('help-widget');
+    const helpFloatButton = document.getElementById('help-float-button');
+    const closeHelpWidget = document.getElementById('close-help-widget');
+    const toggleHelpWidget = document.getElementById('toggle-help-widget');
+      
+      function showHelpWidget() {
+        helpFloatButton.classList.add('hidden');
+        helpWidget.classList.remove('hidden');
+        setTimeout(() => {
+          helpWidget.classList.add('scale-fade-in');
+          helpWidget.classList.remove('opacity-0');
+        }, 10);
+      }
+      
+      function hideHelpWidget() {
+        helpWidget.classList.add('scale-fade-out');
+        setTimeout(() => {
+          helpWidget.classList.add('hidden', 'opacity-0');
+          helpWidget.classList.remove('scale-fade-in', 'scale-fade-out');
+          helpFloatButton.classList.remove('hidden');
+        }, 200);
+      }
+      
+      if (helpFloatButton) helpFloatButton.addEventListener('click', showHelpWidget);
+      if (closeHelpWidget) closeHelpWidget.addEventListener('click', hideHelpWidget);
+      if (toggleHelpWidget) toggleHelpWidget.addEventListener('click', showHelpWidget);
+      
+      // 添加卡片加载动画
+      const cards = document.querySelectorAll('.card-hover-lift');
+      cards.forEach((card, portal ) => {
+        card.classList.add('opacity-0', 'translate-y-4');
+        setTimeout(() => {
+          card.classList.add('opacity-100', 'translate-y-0');
+          card.classList.remove('opacity-0', 'translate-y-4');
+        }, 50 * portal );
+      });
+    });
+  </script>
+</body>
+</html>
