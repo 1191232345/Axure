@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>审核弹窗 - ELSA系统</title>
+  <!-- 引入Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入Font Awesome图标 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Tailwind配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2F5496', // 使用原设计中的主色调
+            secondary: '#6B7280', // 辅助文字颜色
+            neutral: '#F3F4F6', // 中性背景色
+            success: '#10B981', // 通过状态颜色
+            danger: '#EF4444', // 驳回状态颜色
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .input-focus {
+        @apply focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200;
+      }
+      .card-shadow {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+      .section-title {
+        @apply text-sm font-medium text-gray-700 bg-neutral px-3 py-2 rounded-md;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 font-inter">
+  <div class="modal bg-white rounded-lg card-shadow max-w-3xl w-full mx-auto">
+    <!-- 模态框头部 -->
+    <div class="modal-header px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+      <h3 class="text-xl font-semibold text-gray-800">
+        <i class="fas fa-clipboard-check text-primary mr-2"></i>
+        审核
+      </h3>
+      <button class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <!-- 模态框内容 -->
+    <div class="px-6 py-5">
+      <!-- 审核选项 -->
+      <div class="audit-radio mb-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
+        <div class="flex flex-wrap gap-4">
+          <label class="flex items-center cursor-pointer">
+            <input type="radio" name="audit" id="pass" checked class="w-4 h-4 text-primary focus:ring-primary/30 border-gray-300">
+            <span class="ml-2 text-gray-700 hover:text-primary transition-colors duration-150">
+              <i class="fas fa-check-circle mr-1 text-success"></i>通过
+            </span>
+          </label>
+          <label class="flex items-center cursor-pointer">
+            <input type="radio" name="audit" id="reject" class="w-4 h-4 text-primary focus:ring-primary/30 border-gray-300">
+            <span class="ml-2 text-gray-700 hover:text-primary transition-colors duration-150">
+              <i class="fas fa-times-circle mr-1 text-danger"></i>驳回
+            </span>
+          </label>
+        </div>
+      </div>
+      
+      <!-- 基础信息区域 -->
+      <div class="form-group mb-5">
+        <div class="section-title flex items-center mb-4">
+          <i class="fas fa-building text-primary mr-2"></i>
+          基础信息
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="warehouseGroup" class="block text-sm font-medium text-gray-700 mb-1">
+              <span class="text-danger">*</span> 仓群
+            </label>
+            <select id="warehouseGroup" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus bg-white">
+              <option selected>美西仓群</option>
+            </select>
+          </div>
+          <div>
+            <label for="warehouse" class="block text-sm font-medium text-gray-700 mb-1">
+              <span class="text-danger">*</span> 仓库
+            </label>
+            <select id="warehouse" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus bg-white">
+              <option selected>GA005</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 头程信息区域 -->
+      <div class="form-group mb-5">
+        <div class="section-title flex items-center mb-4">
+          <i class="fas fa-ship text-primary mr-2"></i>
+          头程信息
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="deliveryMethod" class="block text-sm font-medium text-gray-700 mb-1">
+              <span class="text-danger">*</span> 交货方式
+            </label>
+            <select id="deliveryMethod" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus bg-white">
+              <option>请选择交货方式</option>
+            </select>
+          </div>
+          <div>
+            <label for="shippingCompany" class="block text-sm font-medium text-gray-700 mb-1">
+              <span class="text-danger">*</span> 船公司
+            </label>
+            <select id="shippingCompany" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus bg-white">
+              <option>请选择船公司</option>
+            </select>
+          </div>
+          
+          <div>
+            <label for="containerNo" class="block text-sm font-medium text-gray-700 mb-1">
+              <span class="text-danger">*</span> 柜号
+            </label>
+            <input type="text" id="containerNo" placeholder="请输入柜号" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus">
+            <div class="text-xs text-gray-500 mt-1 flex flex-wrap gap-1">
+              <span class="px-1.5 py-0.5 bg-gray-100 rounded">易仓填写：CASCO/TIIU4600374/ZCSU6767767</span>
+            </div>
+          </div>
+          <div>
+            <label for="eta" class="block text-sm font-medium text-gray-700 mb-1">
+              <span class="text-danger">*</span> 预计到港日期
+            </label>
+            <input type="date" id="eta" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus">
+          </div>
+          
+          <div>
+            <label for="billOfLading" class="block text-sm font-medium text-gray-700 mb-1">
+              <span class="text-danger">*</span> 提单号
+            </label>
+            <input type="text" id="billOfLading" placeholder="请输入提单号" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus">
+          </div>
+          <div>
+            <label for="truckTeam" class="block text-sm font-medium text-gray-700 mb-1">
+              车队名称
+            </label>
+            <select id="truckTeam" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus bg-white">
+              <option>请选择车队名称</option>
+            </select>
+          </div>
+          
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+              邮箱
+            </label>
+            <input type="email" id="email" placeholder="请输入邮箱,多个邮箱用&隔开" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus">
+          </div>
+          <div>
+            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+              电话号码
+            </label>
+            <input type="tel" id="phone" placeholder="请输入电话号码" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus">
+          </div>
+          
+          <div>
+            <label for="backupPhone" class="block text-sm font-medium text-gray-700 mb-1">
+              备用电话号
+            </label>
+            <input type="tel" id="backupPhone" placeholder="请输入备用电话号" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus">
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 模态框底部 -->
+    <div class="modal-footer px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-3">
+      <button class="close-btn px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-primary focus:ring-offset-1">
+        关闭
+      </button>
+      <button class="submit-btn px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-primary focus:ring-offset-1 flex items-center">
+        <i class="fas fa-paper-plane mr-1.5"></i>
+        提交
+      </button>
+    </div>
+  </div>
+
+  <!-- 交互脚本 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 审核选项切换逻辑
+      const auditPass = document.getElementById('pass');
+      const auditReject = document.getElementById('reject');
+      
+      auditPass.addEventListener('change', function() {
+        if (this.checked) {
+          console.log('审核通过');
+          // 这里可以添加通过审核的额外逻辑
+        }
+      });
+      
+      auditReject.addEventListener('change', function() {
+        if (this.checked) {
+          console.log('审核驳回');
+          // 这里可以添加驳回审核的额外逻辑
+        }
+      });
+      
+      // 表单验证
+      const submitBtn = document.querySelector('.submit-btn');
+      submitBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // 获取必填字段
+        const containerNo = document.getElementById('containerNo').value.trim();
+        const eta = document.getElementById('eta').value.trim();
+        const billOfLading = document.getElementById('billOfLading').value.trim();
+        const deliveryMethod = document.getElementById('deliveryMethod').value;
+        const shippingCompany = document.getElementById('shippingCompany').value;
+        
+        // 简单验证
+        if (!containerNo || !eta || !billOfLading || !deliveryMethod || !shippingCompany) {
+          alert('请填写所有必填项后再提交！');
+          return;
+        }
+        
+        // 提交表单
+        alert('表单提交成功！');
+      });
+      
+      // 关闭按钮逻辑
+      const closeBtn = document.querySelector('.close-btn');
+      closeBtn.addEventListener('click', function() {
+        console.log('关闭表单');
+        // 在实际应用中，这里可以添加关闭模态框的逻辑
+      });
+    });
+  </script>
+</body>
+</html>
