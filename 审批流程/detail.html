@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>审批详情 - ELSA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- 引入浮动按钮和模态框样式 -->
+  <link rel="stylesheet" href="floating-widgets.css"> 
+  <!-- 引入浮动按钮和模态框交互逻辑 -->
+  <script defer src="floating-widgets.js"></script>
+
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2a3b7d', // 一级菜单背景色
+            secondary: '#2A9D8F',
+            success: '#2E7D32',
+            warning: '#E65100',
+            danger: '#C62828',
+            neutral: {
+              100: '#F5F7FA',
+              200: '#E4E7EB',
+              300: '#CBD2D9',
+              400: '#9AA5B1',
+              500: '#7B8794',
+              600: '#616E7C',
+              700: '#52606D',
+              800: '#3E4C59',
+              900: '#1F2933',
+            }
+          },
+          fontFamily: {
+            sans: ['Segoe UI', 'Roboto', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            'card': '0 1px 3px rgba(0, 0, 0, 0.1)',
+            'header': '0 2px 4px rgba(0, 0, 0, 0.1)',
+            'hover': '0 4px 6px rgba(0, 0, 0, 0.1)',
+          },
+          transitionProperty: {
+            'height': 'height',
+            'spacing': 'margin, padding',
+          },
+          animation: {
+            'fadeIn': 'fadeIn 0.3s ease-in-out',
+            'slideDown': 'slideDown 0.3s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideDown: {
+              '0%': { transform: 'translateY(-10px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .table-hover-row {
+        @apply hover:bg-primary/5 transition-colors;
+      }
+      .erp-btn {
+        @apply px-3 py-1.5 rounded text-sm font-medium transition-all;
+      }
+      .erp-btn-primary {
+        @apply bg-primary text-white hover:bg-primary/90;
+      }
+      .erp-btn-secondary {
+        @apply bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-50;
+      }
+      /* 模态框样式 - 删除了自定义样式，使用floating-widgets.css中的完整样式 */
+      .modal-content {
+        @apply bg-white rounded-md shadow-lg overflow-hidden transition-all duration-300 ease-in-out;
+      }
+      .modal-header {
+        @apply px-4 py-3 flex items-center;
+      }
+      .modal-title {
+        @apply text-neutral-800;
+      }
+      .modal-body {
+        @apply max-h-[70vh] overflow-y-auto;
+      }
+      .modal-footer {
+        @apply bg-neutral-50;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-sans bg-neutral-100 text-neutral-800 min-h-screen">
+  <!-- 顶部导航栏 -->
+  <header class="bg-primary text-white shadow-header sticky top-0 z-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-14">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <span class="text-lg font-semibold">ELSA</span>
+          </div>
+          <nav class="hidden md:ml-10 md:flex md:space-x-1">
+            <a href="" class="px-3 py-2 text-xs text-white/80 hover:bg-white/10 mr-1 rounded transition-colors">首页</a>
+            <a href="" class="px-3 py-2 text-xs text-white bg-white/10 mr-1 rounded transition-colors">流程管理</a>
+          </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <button class="p-1.5 rounded hover:bg-primary/80 transition-colors">
+              <i class="fa fa-bell-o"></i>
+              <span class="absolute top-0 right-0 w-2 h-2 bg-warning rounded-full"></span>
+            </button>
+          </div>
+          <div class="flex items-center">
+            <span class="ml-2 text-sm hidden sm:inline-block">zsw</span>
+            <i class="fa fa-angle-down ml-1 text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 二级导航 -->
+    <div class="bg-[#3686da] border-t border-white/10">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center h-10 overflow-x-auto whitespace-nowrap">
+          <a href="" class="px-3 py-2 text-xs text-white bg-white/10 mr-1 rounded">审批详情</a>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <!-- 页面导航栏 -->
+  <div id="form-nav" class="bg-white shadow-md border-t border-b border-neutral-200">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-12">
+        <button id="back-btn" class="text-neutral-600 hover:text-primary flex items-center transition-colors" onclick="window.location.href='sp_index.html'">
+          <i class="fa fa-arrow-left mr-2"></i>
+          <span>返回列表</span>
+        </button>
+        <h2 id="detail-title" class="ml-4 text-base font-medium truncate">审批详情 - 价卡调整申请</h2>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 主要内容区域 -->
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-5">
+    <!-- 上面部分：流程环节和当前审批节点 -->
+    <div class="bg-white rounded shadow-card p-6 mb-4 transform hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+      <h3 class="text-base font-medium mb-6 text-neutral-800 flex items-center">
+        <i class="fa fa-sitemap text-primary mr-2"></i>审批进度
+      </h3>
+      
+      <!-- 审批流程横向进度条 -->
+      <div class="py-8">
+        <!-- 进度步骤容器 -->
+        <div class="flex items-center relative z-10">
+          <!-- 已完成步骤 -->
+          <div class="flex flex-col items-center z-10">
+            <div class="w-10 h-10 rounded-full bg-success text-white flex items-center justify-center text-sm font-medium border-2 border-white shadow-md mb-2">
+              <i class="fa fa-check"></i>
+            </div>
+            <div class="text-center">
+              <div class="font-medium text-success text-sm">申请提交</div>
+              <div class="bg-success/10 text-success text-xs px-2 py-1 rounded-full mt-1 inline-block">
+                <i class="fa fa-check-circle mr-1"></i>已通过
+              </div>
+              <div class="text-success text-xs mt-1">
+                2025/01/01 10:00:00
+              </div>
+            </div>
+          </div>
+          
+          <!-- 环节间连接线 - 已完成 -->
+          <div class="flex-1 h-1 bg-success mx-2"></div>
+          
+          <!-- 进行中步骤 -->
+          <div class="flex flex-col items-center z-10">
+            <div class="w-10 h-10 rounded-full bg-warning text-white flex items-center justify-center text-sm font-medium border-2 border-white shadow-md mb-2 animate-pulse">
+              <i class="fa fa-clock-o"></i>
+            </div>
+            <div class="text-center">
+              <div class="font-medium text-neutral-500 text-sm">审批环节：zsw</div>
+              <div class="bg-warning/10 text-warning text-xs px-2 py-1 rounded-full mt-1 inline-block">
+                <i class="fa fa-spinner fa-spin mr-1"></i>审批中
+              </div>
+            </div>
+          </div>
+          
+          <!-- 环节间连接线 - 未完成 -->
+          <div class="flex-1 h-1 bg-neutral-200 mx-2"></div>
+          
+          <!-- 未开始步骤 -->
+          <div class="flex flex-col items-center z-10">
+            <div class="w-10 h-10 rounded-full bg-white text-neutral-500 flex items-center justify-center text-sm font-medium border-2 border-neutral-300 mb-2">
+              <i class="fa fa-hourglass-start"></i>
+            </div>
+            <div class="text-center">
+              <div class="font-medium text-neutral-500 text-sm">审批环节：zsw</div>
+              <div class="bg-neutral-100 text-neutral-500 text-xs px-2 py-1 rounded-full mt-1 inline-block">
+                <i class="fa fa-hourglass-start mr-1"></i>未审批
+              </div>
+            </div>
+          </div>
+          
+          <!-- 环节间连接线 - 未完成 -->
+          <div class="flex-1 h-1 bg-neutral-200 mx-2"></div>
+          
+          <!-- 未开始步骤 -->
+          <div class="flex flex-col items-center z-10">
+            <div class="w-10 h-10 rounded-full bg-white text-neutral-500 flex items-center justify-center text-sm font-medium border-2 border-neutral-300 mb-2">
+              <i class="fa fa-hourglass-start"></i>
+            </div>
+            <div class="text-center">
+              <div class="font-medium text-neutral-500 text-sm">审批环节：zsw</div>
+              <div class="bg-neutral-100 text-neutral-500 text-xs px-2 py-1 rounded-full mt-1 inline-block">
+                <i class="fa fa-hourglass-start mr-1"></i>未审批
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+
+    </div>
+    
+    <!-- 下面部分：审批明细详情 -->
+    <div class="bg-white rounded shadow-card p-4 transform hover:shadow hover:-translate-y-0.5 transition-all duration-300">
+      <h3 class="text-base font-medium mb-4 text-neutral-800">审批明细</h3>
+      
+      <!-- 审批基本信息 -->
+      <div class="border-b border-neutral-200 pb-4 mb-4">
+        <!-- <h4 class="text-sm font-medium text-neutral-700 mb-3">基本信息</h4> -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label class="form-label">审批单号</label>
+            <div class="text-sm">LEA20231016001</div>
+          </div>
+          <div>
+            <label class="form-label">申请名称</label>
+            <div class="text-sm">价卡调整申请</div>
+          </div>
+          <div>
+            <label class="form-label">申请类型</label>
+            <div class="text-sm">仓储费</div>
+          </div>
+          <div>
+            <label class="form-label">客户代码</label>
+            <div class="text-sm">CUS001</div>
+          </div>
+          <div>
+            <label class="form-label">客户名称</label>
+            <div class="text-sm">测试客户有限公司</div>
+          </div>
+          <div>
+            <label class="form-label">申请日期</label>
+            <div class="text-sm">2023-10-16</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 价格信息 -->
+      <div class="border-b border-neutral-200 pb-4 mb-4">
+        <h4 class="text-sm font-medium text-neutral-700 mb-3">价格信息</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label class="form-label">现价卡</label>
+            <div class="text-sm">标准仓储费价卡 V1.0</div>
+          </div>
+          <div>
+            <label class="form-label">目标价卡</label>
+            <div class="text-sm">优惠仓储费价卡 V2.0</div>
+          </div>
+          <div>
+            <label class="form-label">生效日期</label>
+            <div class="text-sm">2023-11-01</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 价卡详情 -->
+      <div class="border-b border-neutral-200 pb-4 mb-4 animate-fadeIn">
+            <h3 class="text-base font-medium text-neutral-800 mb-3">现价卡详情</h3>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm shadow-sm rounded border border-neutral-200">
+                <thead class="bg-neutral-50">
+                  <tr>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">开始天数</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">结束天数</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">单位</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">单价</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">最低价</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">最高价</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-200" id="pricecard-items">
+                  <tr class="hover:bg-neutral-50 transition-colors">
+                    <td class="px-3 py-2">
+                      <input type="text" value="0" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                    </td>
+                    <td class="px-3 py-2">
+                      <input type="text" value="9999" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                    </td>
+                    <td class="px-3 py-2">
+                      <input type="text" value="体积 m³" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                    </td>
+                    <td class="px-3 py-2">
+                      <input type="text" value="1³" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                    </td>
+                    <td class="px-3 py-2">
+                      <input type="text" value="10" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                    </td>
+                    <td class="px-3 py-2">
+                      <input type="text" value="100" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+      
+       <!-- 价卡详情 -->
+      <div class="border-b border-neutral-200 pb-4 mb-4 animate-fadeIn">
+            <h3 class="text-base font-medium text-neutral-800 mb-3">目标价卡详情</h3>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-sm shadow-sm rounded border border-neutral-200">
+                <thead class="bg-neutral-50">
+                  <tr>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">开始天数</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">结束天数</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">单位</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">单价</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">最低价</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">最高价</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-neutral-200" id="pricecard-items">
+                  <tr class="hover:bg-neutral-50 transition-colors">
+                    <td class="px-3 py-2">
+                      <input type="text" value="0" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                    </td>
+                    <td class="px-3 py-2">
+                      <input type="text" value="9999" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                    </td>
+                    <td class="px-3 py-2">
+                      <input type="text" value="体积 m³" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                    </td>
+                    <td class="px-3 py-2">
+                      <input type="text" value="1³" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                    </td>
+                    <td class="px-3 py-2">
+                      <input type="text" value="10" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                    </td>
+                    <td class="px-3 py-2">
+                      <input type="text" value="100" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+      
+      <!-- 调整说明 -->
+      <div class="mb-4">
+        <h4 class="text-sm font-medium text-neutral-700 mb-3">调整说明</h4>
+        <div class="p-3 border border-neutral-200 rounded bg-neutral-50 text-sm">
+          因客户为长期合作大客户，且承诺未来三个月订单量增长30%，特申请调整仓储费价卡，给予一定优惠折扣以维持良好的客户关系。
+        </div>
+      </div>
+
+      <!-- 备注 -->
+      <div class="mb-4">
+        <h4 class="text-sm font-medium text-neutral-700 mb-3">备注</h4>
+        <div class="p-3 border border-neutral-200 rounded bg-neutral-50 text-sm">
+          这是一段描述
+        </div>
+      
+      <!-- 附件 -->
+      <div class="mb-4">
+        <h4 class="text-sm font-medium text-neutral-700 mb-3">附件</h4>
+        <div class="p-3 border border-neutral-200 rounded bg-neutral-50 text-sm">
+         这是一条附件.pdf
+        </div>
+    </div>
+  </div>
+  
+  <!-- 操作按钮区域 -->
+  <div class="bg-white border-t border-neutral-200 py-3 px-4 sticky bottom-0 z-10 shadow-md">
+    <div class="container mx-auto sm:px-6 lg:px-8 flex justify-center gap-3">
+      <button class="erp-btn erp-btn-secondary" onclick="window.location.href='sp_index.html'">返回列表</button>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELSA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2a3b7d', // 一级菜单背景色
+            secondary: '#3686da', // 二级菜单背景色
+            success: '#2E7D32',
+            warning: '#E65100',
+            danger: '#C62828',
+            pending: '#1E88E5',
+            neutral: {
+              100: '#F5F7FA',
+              200: '#E4E7EB',
+              300: '#CBD2D9',
+              400: '#9AA5B1',
+              500: '#7B8794',
+              600: '#616E7C',
+              700: '#52606D',
+              800: '#3E4C59',
+              900: '#1F2933',
+            }
+          },
+          fontFamily: {
+            sans: ['Segoe UI', 'Roboto', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            'card': '0 1px 3px rgba(0, 0, 0, 0.1)',
+            'header': '0 2px 4px rgba(0, 0, 0, 0.1)',
+          }
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .table-hover-row {
+        @apply hover:bg-primary/5 transition-colors;
+      }
+      .erp-btn {
+        @apply px-3 py-1.5 rounded text-sm font-medium transition-all;
+      }
+      .erp-btn-primary {
+        @apply bg-primary text-white hover:bg-primary/90;
+      }
+      .erp-btn-secondary {
+        @apply bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-50;
+      }
+      /* 模态框样式 - 删除了自定义样式，使用floating-widgets.css中的完整样式 */
+      .modal-content {
+        @apply bg-white rounded-md shadow-lg overflow-hidden transition-all duration-300 ease-in-out;
+      }
+      .modal-header {
+        @apply px-4 py-3 flex items-center;
+      }
+      .modal-title {
+        @apply text-neutral-800;
+      }
+      .modal-body {
+        @apply max-h-[70vh] overflow-y-auto;
+      }
+      .modal-footer {
+        @apply bg-neutral-50;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-sans bg-neutral-100 text-neutral-800 min-h-screen">
+  <!-- 顶部导航栏 -->
+  <header class="bg-primary text-white shadow-header sticky top-0 z-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-14">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <span class="text-lg font-semibold">ELSA</span>
+          </div>
+          <nav class="hidden md:ml-10 md:flex md:space-x-1">
+             <a href="#" class="px-3 py-2 text-sm hover:bg-primary/80 transition-colors">首页</a>
+            <a href="#" class="px-3 py-2 text-sm bg-primary/80 border-b-2 border-white">流程管理</a>
+          </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <button class="p-1.5 rounded hover:bg-primary/80 transition-colors">
+              <i class="fa fa-bell-o"></i>
+              <span class="absolute top-0 right-0 w-2 h-2 bg-warning rounded-full"></span>
+            </button>
+          </div>
+          <div class="flex items-center">
+            <span class="ml-2 text-sm hidden sm:inline-block">zsw</span>
+            <i class="fa fa-angle-down ml-1 text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 二级导航 -->
+    <div class="bg-secondary border-t border-white/10">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center h-10 overflow-x-auto whitespace-nowrap">
+          <a href="index.html" class="px-3 py-2 text-xs text-white/80 hover:bg-white/10 mr-1 rounded transition-colors">模板管理</a>
+          <a href="index.html" class="px-3 py-2 text-xs text-white bg-white/10 mr-1 rounded">申请管理</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主要内容区 -->
+  <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-5">
+    <!-- 搜索卡片区域 -->
+    <div class="bg-white rounded shadow-card p-4 mb-4">
+      <div class="flex flex-col lg:flex-row gap-3">
+        <div class="flex flex-wrap gap-3">
+          <div class="flex items-center">
+            <label class="text-xs text-neutral-600 mr-2">审批单号：</label>
+            <div class="relative w-40">
+              <input type="text" placeholder="请输入单号" class="w-full pl-3 pr-3 py-1.5 text-sm border border-neutral-300 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+            </div>
+          </div>
+          
+          <div class="flex items-center">
+            <label class="text-xs text-neutral-600 mr-2">创建人：</label>
+            <div class="relative w-40">
+              <select class="w-full pl-3 pr-8 py-1.5 text-sm border border-neutral-300 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none bg-white">
+                <option value="">全部</option>
+              </select>
+              <i class="fa fa-angle-down absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-xs pointer-events-none"></i>
+            </div>
+          </div>
+          
+          <div class="flex items-center">
+            <label class="text-xs text-neutral-600 mr-2">状态：</label>
+            <div class="relative w-40">
+              <select class="w-full pl-3 pr-8 py-1.5 text-sm border border-neutral-300 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none appearance-none bg-white">
+                <option value="">全部</option>
+                <option value="pending">草稿</option>
+                <option value="pending">待审批</option>
+                <option value="approved">已通过</option>
+                <option value="rejected">已拒绝</option>
+                <option value="cancelled">已取消</option>
+              </select>
+              <i class="fa fa-angle-down absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-xs pointer-events-none"></i>
+            </div>
+          </div>
+          
+          <div class="flex items-center">
+            <label class="text-xs text-neutral-600 mr-2">创建日期：</label>
+            <div class="flex gap-2">
+              <input type="date" class="w-36 pl-3 pr-3 py-1.5 text-sm border border-neutral-300 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+              <span class="text-neutral-500 self-center">至</span>
+              <input type="date" class="w-36 pl-3 pr-3 py-1.5 text-sm border border-neutral-300 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex gap-2 w-full lg:w-auto lg:ml-auto lg:justify-end">
+          <button id="search-btn" class="erp-btn erp-btn-primary flex items-center justify-center flex-1 lg:flex-none">
+            <i class="fa fa-search mr-1.5"></i> 搜索
+          </button>
+          <button id="reset-btn" class="erp-btn erp-btn-secondary flex items-center justify-center flex-1 lg:flex-none">
+            <i class="fa fa-refresh mr-1.5"></i> 重置
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 列表卡片区域 -->
+    <div class="bg-white rounded shadow-card overflow-hidden">
+      <!-- 列表操作区域 -->
+      <div class="px-3 py-3 border-b border-neutral-200">
+        <button id="add-btn" class="erp-btn erp-btn-primary flex items-center justify-center">
+          <i class="fa fa-plus mr-1.5"></i> 新增
+        </button>
+      </div>
+      <!-- 列表展示区域 -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-neutral-200 text-sm">
+          <thead class="bg-neutral-100">
+            <tr>
+              <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">审批单号</th>
+              <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">名称</th>
+              <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">创建人</th>
+              <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">创建时间</th>
+              <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">状态</th>
+              <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">操作</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-neutral-200" id="approval-table-body">
+            <!-- 审批列表项1 -->
+            <tr class="table-hover-row" data-id="EQU20231013002">
+              <td class="px-3 py-2 font-medium">EQU20231013002</td>
+              <td class="px-3 py-2">价卡调整申请</td>
+              <td class="px-3 py-2">
+                <div class="flex items-center">
+                  zsw
+                </div>
+              </td>
+              <td class="px-3 py-2 text-neutral-600">2023-10-13 16:45</td>
+              <td class="px-3 py-2">
+                <span class="status-tag bg-neutral-200 text-neutral-700">草稿</span>
+              </td>
+              <td class="px-3 py-2">
+                <div class="flex space-x-1">
+                  <button class="text-primary text-xs hover:underline view-btn" title="编辑">
+                    <i class="fa fa-eye mr-0.5"></i> 编辑
+                  </button>
+                  <button class="text-secondary text-xs hover:underline copy-btn" title="复制">
+                    <i class="fa fa-copy mr-0.5"></i> 复制
+                  </button>
+                  <button class="text-danger text-xs hover:underline cancel-btn" title="取消">
+                    <i class="fa fa-times mr-0.5"></i> 删除
+                  </button>
+
+                </div>
+              </td>
+            </tr>
+
+            <tr class="table-hover-row" data-id="LEA20231016001">
+              <td class="px-3 py-2 font-medium">LEA20231016001</td>
+              <td class="px-3 py-2">价卡调整申请</td>
+              <td class="px-3 py-2">
+                <div class="flex items-center">
+                  <!-- <img class="h-5 w-5 rounded-full mr-2" src="https://picsum.photos/id/1012/100/100" alt="用户头像"> -->
+                    zsw
+                </div>
+              </td>
+              <td class="px-3 py-2 text-neutral-600">2023-10-16 09:23</td>
+              <td class="px-3 py-2">
+                <span class="status-tag bg-pending/10 text-pending">待审批</span>
+              </td>
+              <td class="px-3 py-2">
+                <div class="flex space-x-1">
+                  <a href="detail.html" class="text-primary text-xs hover:underline view-btn" title="查看">
+                    <i class="fa fa-eye mr-0.5"></i> 查看
+                  </a>
+                  <button class="text-secondary text-xs hover:underline copy-btn" title="复制">
+                    <i class="fa fa-copy mr-0.5"></i> 复制
+                  </button>
+                  
+                </div>
+              </td>
+            </tr>
+            
+            <!-- 审批列表项2 -->
+            <tr class="table-hover-row" data-id="PUR20231015003">
+              <td class="px-3 py-2 font-medium">PUR20231015003</td>
+              <td class="px-3 py-2">价卡调整申请</td>
+              <td class="px-3 py-2">
+                <div class="flex items-center">
+                  zsw
+                </div>
+              </td>
+              <td class="px-3 py-2 text-neutral-600">2023-10-15 14:56</td>
+              <td class="px-3 py-2">
+                <span class="status-tag bg-success/10 text-success">已通过</span>
+              </td>
+              <td class="px-3 py-2">
+                <div class="flex space-x-1">
+                  <a href="detail.html" class="text-primary text-xs hover:underline view-btn" title="查看">
+                    <i class="fa fa-eye mr-0.5"></i> 查看
+                  </a>
+                  <button class="text-secondary text-xs hover:underline copy-btn" title="复制">
+                    <i class="fa fa-copy mr-0.5"></i> 复制
+                  </button>
+                </div>
+              </td>
+            </tr>
+            
+            <!-- 审批列表项3 -->
+            <tr class="table-hover-row" data-id="REI20231014005">
+              <td class="px-3 py-2 font-medium">REI20231014005</td>
+              <td class="px-3 py-2">价卡调整申请</td>
+              <td class="px-3 py-2">
+                <div class="flex items-center">
+                  zsw
+                </div>
+              </td>
+              <td class="px-3 py-2 text-neutral-600">2023-10-14 11:32</td>
+              <td class="px-3 py-2">
+                <span class="status-tag bg-danger/10 text-danger">已驳回</span>
+              </td>
+              <td class="px-3 py-2">
+                <div class="flex space-x-1">
+                  <a href="detail.html" class="text-primary text-xs hover:underline view-btn" title="查看">
+                    <i class="fa fa-eye mr-0.5"></i> 查看
+                  </a>
+                  <button class="text-secondary text-xs hover:underline copy-btn" title="复制">
+                    <i class="fa fa-copy mr-0.5"></i> 复制
+                  </button>
+
+                </div>
+              </td>
+            </tr>
+            
+            <!-- 审批列表项4 -->
+            <tr class="table-hover-row" data-id="EQU20231013002">
+              <td class="px-3 py-2 font-medium">EQU20231013002</td>
+              <td class="px-3 py-2">价卡调整申请</td>
+              <td class="px-3 py-2">
+                <div class="flex items-center">
+                  zsw
+                </div>
+              </td>
+              <td class="px-3 py-2 text-neutral-600">2023-10-13 16:45</td>
+              <td class="px-3 py-2">
+                <span class="status-tag bg-neutral-200 text-neutral-700">已取消</span>
+              </td>
+              <td class="px-3 py-2">
+                <div class="flex space-x-1">
+                  <a href="detail.html" class="text-primary text-xs hover:underline view-btn" title="查看">
+                    <i class="fa fa-eye mr-0.5"></i> 查看
+                  </a>
+                  <button class="text-secondary text-xs hover:underline copy-btn" title="复制">
+                    <i class="fa fa-copy mr-0.5"></i> 复制
+                  </button>
+
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- 分页控件 -->
+      <div class="border-t border-neutral-200 px-3 py-2 flex flex-col sm:flex-row justify-between items-center gap-2">
+        <div class="text-xs text-neutral-500">
+          显示 1-5 条，共 38 条
+        </div>
+        <div class="flex items-center">
+          <button class="erp-btn erp-btn-secondary w-7 h-7 p-0 flex items-center justify-center mx-0.5" disabled>
+            <i class="fa fa-angle-left text-xs"></i>
+          </button>
+          <button class="erp-btn erp-btn-primary w-7 h-7 p-0 flex items-center justify-center mx-0.5">1</button>
+          <button class="erp-btn erp-btn-secondary w-7 h-7 p-0 flex items-center justify-center mx-0.5">2</button>
+          <button class="erp-btn erp-btn-secondary w-7 h-7 p-0 flex items-center justify-center mx-0.5">3</button>
+          <button class="erp-btn erp-btn-secondary w-7 h-7 p-0 flex items-center justify-center mx-0.5">4</button>
+          <button class="erp-btn erp-btn-secondary w-7 h-7 p-0 flex items-center justify-center mx-0.5">5</button>
+          <button class="erp-btn erp-btn-secondary w-7 h-7 p-0 flex items-center justify-center mx-0.5">
+            <i class="fa fa-angle-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+
+  <!-- 模板选择模态框 (默认隐藏) -->
+  <div id="template-select-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-3xl max-h-[90vh] flex flex-col">
+      <div class="px-6 py-4 border-b border-neutral-200 flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-neutral-800">选择模板</h3>
+        <button id="close-template-modal" class="text-neutral-500 hover:text-neutral-700 p-1">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <div class="px-6 py-4 flex-grow overflow-y-auto">
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-neutral-700 mb-2">请选择一个模板 <span class="text-danger">*</span></label>
+          <select id="template-select" class="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+            <option value="">请选择模板</option>
+            <option value="priceCard">价卡调整申请</option>
+          </select>
+          <div class="mt-2 text-sm text-neutral-500">
+            <span id="template-info"></span>
+          </div>
+          <p id="template-error" class="text-danger text-xs mt-2 hidden">请选择一个模板</p>
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-neutral-200 bg-neutral-50 flex justify-end gap-3">
+        <button id="template-cancel" class="erp-btn erp-btn-secondary">取消</button>
+        <button id="template-confirm" class="erp-btn erp-btn-primary">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 确认取消对话框 (默认隐藏) -->
+  <div id="cancel-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-5">
+      <div class="text-center mb-4">
+        <div class="w-12 h-12 rounded-full bg-danger/10 flex items-center justify-center text-danger mx-auto mb-3">
+          <i class="fa fa-exclamation-triangle text-xl"></i>
+        </div>
+        <h3 class="text-base font-semibold">确认取消审批单？</h3>
+        <p class="text-sm text-neutral-500 mt-2" id="cancel-modal-text">确定要取消此审批单吗？取消后将无法恢复。</p>
+      </div>
+      <div class="flex gap-3 mt-5">
+        <button id="cancel-modal-cancel" class="erp-btn erp-btn-secondary flex-1">取消</button>
+        <button id="cancel-modal-confirm" class="erp-btn erp-btn-primary bg-danger hover:bg-danger/90 flex-1">确认取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 搜索功能实现
+      const searchBtn = document.getElementById('search-btn');
+      const resetBtn = document.getElementById('reset-btn');
+      const addBtn = document.getElementById('add-btn');
+      const tableRows = document.querySelectorAll('#approval-table-body tr');
+      
+      // 搜索按钮点击事件
+      searchBtn.addEventListener('click', function() {
+        // 实际项目中这里会有真实的搜索逻辑
+        alert('执行搜索操作');
+      });
+      
+      // 重置按钮点击事件
+      resetBtn.addEventListener('click', function() {
+        // 清空所有输入框
+        document.querySelectorAll('input, select').forEach(el => {
+          el.value = '';
+        });
+      });
+      
+      // 模板选择相关元素
+      const templateModal = document.getElementById('template-select-modal');
+      const closeTemplateModalBtn = document.getElementById('close-template-modal');
+      const templateCancelBtn = document.getElementById('template-cancel');
+      const templateConfirmBtn = document.getElementById('template-confirm');
+      const templateError = document.getElementById('template-error');
+      const templateSelect = document.getElementById('template-select');
+      const templateInfo = document.getElementById('template-info');
+      
+      // 模板信息映射
+      const templateDetails = {
+        'priceCard': {
+          name: '价卡调整申请',
+          category: '费用管理',
+          department: '市场部'
+        },
+        'leave': {
+          name: '请假申请',
+          category: '人事管理',
+          department: '全公司'
+        },
+        'purchase': {
+          name: '采购申请',
+          category: '资源管理',
+          department: '各部门'
+        },
+        'reimbursement': {
+          name: '报销申请',
+          category: '费用管理',
+          department: '全公司'
+        }
+      };
+      
+      // 显示模板选择模态框
+      function showTemplateModal() {
+        templateModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // 防止背景滚动
+        // 重置选中状态和错误提示
+        templateSelect.value = '';
+        templateInfo.textContent = '';
+        templateError.classList.add('hidden');
+      }
+      
+      // 隐藏模板选择模态框
+      function hideTemplateModal() {
+        templateModal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+      
+      // 新增按钮点击事件
+      addBtn.addEventListener('click', function() {
+        showTemplateModal();
+      });
+      
+      // 模板选择变化事件
+      templateSelect.addEventListener('change', function() {
+        const templateValue = this.value;
+        templateError.classList.add('hidden'); // 清除错误提示
+        
+        // 更新模板信息显示
+        if (templateValue && templateDetails[templateValue]) {
+          const details = templateDetails[templateValue];
+          templateInfo.textContent = `分类：${details.category} | 适用部门：${details.department}`;
+        } else {
+          templateInfo.textContent = '';
+        }
+      });
+      
+      // 关闭模态框
+      closeTemplateModalBtn.addEventListener('click', hideTemplateModal);
+      templateCancelBtn.addEventListener('click', hideTemplateModal);
+      
+      // 点击模态框外部关闭
+      templateModal.addEventListener('click', function(event) {
+        if (event.target === templateModal) {
+          hideTemplateModal();
+        }
+      });
+      
+      // 模板确认按钮点击事件
+      templateConfirmBtn.addEventListener('click', function() {
+        const templateValue = templateSelect.value;
+        if (!templateValue) {
+          templateError.classList.remove('hidden');
+          return;
+        }
+        
+        const templateName = templateDetails[templateValue]?.name || templateValue;
+        
+        // 隐藏模态框
+        hideTemplateModal();
+        
+        // 跳转到add.html页面，并携带模板参数
+        window.location.href = `add.html?template=${templateValue}&name=${encodeURIComponent(templateName)}`;
+      });
+      
+      // ESC键关闭模态框
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && templateModal.style.display === 'flex') {
+          hideTemplateModal();
+        }
+      });
+      
+      // 查看按钮点击事件
+      document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.closest('tr').getAttribute('data-id');
+          // 跳转到查看审批单详情页面
+          window.location.href = `#view-approval-${id}`;
+          alert(`查看审批单 ${id} 的详情`);
+        });
+      });
+      
+      // 复制按钮点击事件
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const id = this.closest('tr').getAttribute('data-id');
+          const name = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+          // 复制审批单逻辑
+          alert(`复制审批单 ${id} (${name}) 到新申请`);
+        });
+      });
+      
+      // 取消按钮点击事件 - 显示确认对话框
+      const cancelModal = document.getElementById('cancel-modal');
+      const cancelModalCancel = document.getElementById('cancel-modal-cancel');
+      const cancelModalConfirm = document.getElementById('cancel-modal-confirm');
+      let currentCancelId = null;
+      
+      document.querySelectorAll('.cancel-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const tr = this.closest('tr');
+          currentCancelId = tr.getAttribute('data-id');
+          const name = tr.querySelector('td:nth-child(2)').textContent;
+          
+          // 更新对话框文本
+          document.getElementById('cancel-modal-text').textContent = 
+            `确定要取消审批单 ${currentCancelId} (${name}) 吗？取消后将无法恢复。`;
+          
+          // 显示对话框
+          cancelModal.classList.remove('hidden');
+          // 阻止页面滚动
+          document.body.style.overflow = 'hidden';
+        });
+      });
+      
+      // 取消对话框 - 取消按钮
+      cancelModalCancel.addEventListener('click', function() {
+        cancelModal.classList.add('hidden');
+        document.body.style.overflow = '';
+        currentCancelId = null;
+      });
+      
+      // 取消对话框 - 确认按钮
+      cancelModalConfirm.addEventListener('click', function() {
+        if (currentCancelId) {
+          // 执行取消操作
+          alert(`已取消审批单 ${currentCancelId}`);
+          
+          // 在实际项目中，这里会调用API执行取消操作，然后刷新列表
+          // 这里简单模拟一下状态变化
+          const tr = document.querySelector(`tr[data-id="${currentCancelId}"]`);
+          if (tr) {
+            tr.querySelector('.status-tag').className = 'status-tag bg-neutral-200 text-neutral-700';
+            tr.querySelector('.status-tag').textContent = '已取消';
+            tr.querySelector('td:nth-child(6)').textContent = '-';
+            const actionTd = tr.querySelector('td:last-child');
+            actionTd.innerHTML = `
+              <div class="flex space-x-1">
+                <a href="detail.html" class="text-primary text-xs hover:underline view-btn" title="查看">
+                    <i class="fa fa-eye mr-0.5"></i> 查看
+                  </a>
+                <button class="text-secondary text-xs hover:underline copy-btn" title="复制">
+                  <i class="fa fa-copy mr-0.5"></i> 复制
+                </button>
+                <button class="text-neutral-400 text-xs cursor-not-allowed" title="已取消">
+                  <i class="fa fa-times mr-0.5"></i> 取消
+                </button>
+              </div>
+            `;
+          }
+        }
+        
+        cancelModal.classList.add('hidden');
+        document.body.style.overflow = '';
+        currentCancelId = null;
+      });
+      
+      // 点击对话框外部关闭
+      cancelModal.addEventListener('click', function(e) {
+          if (e.target === cancelModal) {
+            cancelModal.classList.add('hidden');
+            document.body.style.overflow = '';
+            currentCancelId = null;
+          }
+        });
+        
+        // 检查是否有新提交的审批数据
+        function checkForNewApproval() {
+          const urlParams = new URLSearchParams(window.location.search);
+          const hasNewApproval = urlParams.get('newApproval') === 'true';
+          
+          if (hasNewApproval) {
+            // 从localStorage获取新审批数据
+            const newApprovalJson = localStorage.getItem('newApprovalData');
+            
+            if (newApprovalJson) {
+              try {
+                const newApproval = JSON.parse(newApprovalJson);
+                
+                // 创建新的表格行
+                const tableBody = document.getElementById('approval-table-body');
+                const newRow = document.createElement('tr');
+                newRow.className = 'table-hover-row';
+                newRow.setAttribute('data-id', newApproval.id);
+                
+                // 格式化创建时间为与现有格式一致
+                const dateObj = new Date(newApproval.createTime);
+                const formattedDate = `${String(dateObj.getFullYear()).padStart(4, '0')}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')} ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+                
+                // 设置表格行内容
+                newRow.innerHTML = `
+                  <td class="px-3 py-2 font-medium">${newApproval.id}</td>
+                  <td class="px-3 py-2">${newApproval.title}</td>
+                  <td class="px-3 py-2">
+                    <div class="flex items-center">
+                      ${newApproval.creator}
+                    </div>
+                  </td>
+                  <td class="px-3 py-2 text-neutral-600">${formattedDate}</td>
+                  <td class="px-3 py-2">
+                    <span class="status-tag bg-pending/10 text-pending">待审批</span>
+                  </td>
+                  <td class="px-3 py-2">
+                    <div class="flex space-x-1">
+                      <a href="detail.html" class="text-primary text-xs hover:underline view-btn" title="查看">
+                    <i class="fa fa-eye mr-0.5"></i> 查看
+                  </a>
+                      <button class="text-secondary text-xs hover:underline copy-btn" title="复制">
+                        <i class="fa fa-copy mr-0.5"></i> 复制
+                      </button>
+                      <button class="text-danger text-xs hover:underline cancel-btn" title="取消">
+                        <i class="fa fa-times mr-0.5"></i> 取消
+                      </button>
+                    </div>
+                  </td>
+                `;
+                
+                // 将新行添加到表格顶部
+                tableBody.insertBefore(newRow, tableBody.firstChild);
+                
+                // 添加事件监听器到新行的按钮
+                const viewBtn = newRow.querySelector('.view-btn');
+                viewBtn.addEventListener('click', function() {
+                  const id = this.closest('tr').getAttribute('data-id');
+                  window.location.href = `#view-approval-${id}`;
+                  alert(`查看审批单 ${id} 的详情`);
+                });
+                
+                const copyBtn = newRow.querySelector('.copy-btn');
+                copyBtn.addEventListener('click', function() {
+                  const id = this.closest('tr').getAttribute('data-id');
+                  const name = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+                  alert(`复制审批单 ${id} (${name}) 到新申请`);
+                });
+                
+                const cancelBtn = newRow.querySelector('.cancel-btn');
+                cancelBtn.addEventListener('click', function() {
+                  const tr = this.closest('tr');
+                  currentCancelId = tr.getAttribute('data-id');
+                  const name = tr.querySelector('td:nth-child(2)').textContent;
+                  
+                  // 更新对话框文本
+                  document.getElementById('cancel-modal-text').textContent = 
+                    `确定要取消审批单 ${currentCancelId} (${name}) 吗？取消后将无法恢复。`;
+                  
+                  // 显示对话框
+                  cancelModal.classList.remove('hidden');
+                  document.body.style.overflow = 'hidden';
+                });
+                
+                // 清除localStorage中的数据，避免重复添加
+                localStorage.removeItem('newApprovalData');
+                
+                // 添加视觉反馈，高亮显示新添加的行
+                newRow.classList.add('bg-primary/5');
+                setTimeout(() => {
+                  newRow.classList.remove('bg-primary/5');
+                }, 3000);
+              } catch (e) {
+                console.error('解析新审批数据失败:', e);
+              }
+            }
+            
+            // 移除URL参数，避免刷新页面时重复添加
+            history.replaceState({}, document.title, window.location.pathname);
+          }
+        }
+        
+        // 执行检查
+        checkForNewApproval();
+    });
+  </script>
+</body>
+</html>

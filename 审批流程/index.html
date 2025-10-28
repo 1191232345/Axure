@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELSA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- 引入浮动按钮和模态框样式 -->
+  <link rel="stylesheet" href="floating-widgets.css"> 
+  <!-- 引入浮动按钮和模态框交互逻辑 -->
+  <script defer src="floating-widgets.js"></script>
+  
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2a3b7d', // 一级菜单背景色
+            secondary: '#2A9D8F',
+            success: '#2E7D32',
+            warning: '#E65100',
+            danger: '#C62828', // 错误颜色
+            neutral: {
+              100: '#F5F7FA',
+              200: '#E4E7EB',
+              300: '#CBD2D9',
+              400: '#9AA5B1',
+              500: '#7B8794',
+              600: '#616E7C',
+              700: '#52606D',
+              800: '#3E4C59',
+              900: '#1F2933',
+            }
+          },
+          fontFamily: {
+            sans: ['Segoe UI', 'Roboto', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            'card': '0 1px 3px rgba(0, 0, 0, 0.1)',
+            'header': '0 2px 4px rgba(0, 0, 0, 0.1)',
+          }
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .table-hover-row {
+        @apply hover:bg-primary/5 transition-colors;
+      }
+      .erp-btn {
+        @apply px-3 py-1.5 rounded text-sm font-medium transition-all;
+      }
+      .erp-btn-primary {
+        @apply bg-primary text-white hover:bg-primary/90;
+      }
+      .erp-btn-secondary {
+        @apply bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-50;
+      }
+      /* 模态框样式 - 删除了自定义样式，使用floating-widgets.css中的完整样式 */
+      .modal-content {
+        @apply bg-white rounded-md shadow-lg overflow-hidden transition-all duration-300 ease-in-out;
+      }
+      .modal-header {
+        @apply px-4 py-3 flex items-center;
+      }
+      .modal-title {
+        @apply text-neutral-800;
+      }
+      .modal-body {
+        @apply max-h-[70vh] overflow-y-auto;
+      }
+      .modal-footer {
+        @apply bg-neutral-50;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-sans bg-neutral-100 text-neutral-800 min-h-screen">
+  <!-- 顶部导航栏 -->
+  <header class="bg-primary text-white shadow-header sticky top-0 z-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-14">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <!-- <i class="fa fa-cogs text-2xl mr-2"></i> -->
+            <span class="text-lg font-semibold">ELSA</span>
+          </div>
+          <nav class="hidden md:ml-10 md:flex md:space-x-1">
+            <a href="#" class="px-3 py-2 text-sm hover:bg-primary/80 transition-colors">首页</a>
+            <a href="#" class="px-3 py-2 text-sm bg-primary/80 border-b-2 border-white">流程管理</a>
+    
+          </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <button class="p-1.5 rounded hover:bg-primary/80 transition-colors">
+              <i class="fa fa-bell-o"></i>
+              <span class="absolute top-0 right-0 w-2 h-2 bg-warning rounded-full"></span>
+            </button>
+          </div>
+          <div class="flex items-center">
+      
+            <span class="ml-2 text-sm hidden sm:inline-block">zsw</span>
+            <i class="fa fa-angle-down ml-1 text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 二级导航 -->
+    <div class="bg-[#3686da] border-t border-white/10">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center h-10 overflow-x-auto whitespace-nowrap">
+          <a href="index.html" class="px-3 py-2 text-xs text-white bg-white/10 mr-1 rounded">模板管理</a>
+          <a href="sp_index.html" class="px-3 py-2 text-xs text-white/80 hover:bg-white/10 mr-1 rounded transition-colors">申请管理</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主要内容区 -->
+  <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-5">
+    <!-- 搜索卡片区域 -->
+    <div class="bg-white rounded shadow-card p-4 mb-4">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+        <div class="flex items-center w-full sm:w-auto">
+          <label class="text-xs text-neutral-600 mr-2">名称：</label>
+          <div class="relative flex-1 sm:w-64">
+            <input type="text" id="template-search" placeholder="请输入模板名称搜索..." class="w-full pl-7 pr-3 py-1.5 text-sm border border-neutral-300 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none">
+            <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-xs"></i>
+          </div>
+        </div>
+        
+        <div class="flex gap-2 w-full sm:w-auto sm:ml-auto">
+          <button id="search-btn" class="erp-btn erp-btn-primary flex items-center justify-center flex-1 sm:flex-none">
+            <i class="fa fa-search mr-1.5"></i> 搜索
+          </button>
+          <button id="reset-btn" class="erp-btn erp-btn-secondary flex items-center justify-center flex-1 sm:flex-none">
+            <i class="fa fa-refresh mr-1.5"></i> 重置
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 列表卡片区域 -->
+    <div class="bg-white rounded shadow-card overflow-hidden">
+      <!-- 列表展示区域 -->
+      <div class="overflow-x-auto">
+        <!-- <button id="get-template-btn" class="erp-btn erp-btn-primary flex items-center justify-center flex-1 sm:flex-none mb-4 py-2 hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5">
+          <i class="fa fa-download mr-1.5"></i>创建模板
+        </button> -->
+        <table class="min-w-full divide-y divide-neutral-200 text-sm">
+          <thead class="bg-neutral-100">
+            <tr>
+              <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">名称</th>
+              <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">分类</th>
+              <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">适用部门</th>
+              <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">操作</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-neutral-200" id="template-table-body">      
+            <tr class="table-hover-row template-row" data-template="priceCard" data-name="价卡调整申请">
+              <td class="px-3 py-2">
+                <label class="cursor-pointer">价卡调整申请</label>
+              </td>
+              <td class="px-3 py-2">费用管理</td>
+              <td class="px-3 py-2">市场部</td>
+              <td class="px-3 py-2">
+                <button class="text-primary text-xs hover:underline use-template">编辑</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- 分页控件 -->
+      <div class="border-t border-neutral-200 px-3 py-2 flex flex-col sm:flex-row justify-between items-center gap-2">
+        <div class="text-xs text-neutral-500">
+          显示 1-5 条，共 23 条
+        </div>
+        <div class="flex items-center">
+          <button class="erp-btn erp-btn-secondary w-7 h-7 p-0 flex items-center justify-center mx-0.5" disabled>
+            <i class="fa fa-angle-left text-xs"></i>
+          </button>
+          <button class="erp-btn erp-btn-primary w-7 h-7 p-0 flex items-center justify-center mx-0.5">1</button>
+          <button class="erp-btn erp-btn-secondary w-7 h-7 p-0 flex items-center justify-center mx-0.5">2</button>
+          <button class="erp-btn erp-btn-secondary w-7 h-7 p-0 flex items-center justify-center mx-0.5">3</button>
+          <button class="erp-btn erp-btn-secondary w-7 h-7 p-0 flex items-center justify-center mx-0.5">
+            <i class="fa fa-angle-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 浮动按钮区域 -->
+    <div class="floating-widgets">
+      <!-- 逻辑说明按钮 -->
+      <button class="floating-btn logic-btn" data-modal-id="logicModal">
+        <i class="fas fa-lightbulb"></i>
+        <span class="btn-text">逻辑说明</span>
+      </button>
+
+        <!-- 版本记录按钮 -->
+          <button class="floating-btn version-btn" data-modal-id="versionModal">
+            <i class="fas fa-history"></i>
+            <span class="btn-text">版本记录</span>
+          </button>
+      </div>
+
+      <!-- 逻辑说明模态框 -->
+      <div id="logicModal" class="modal-overlay">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">业务逻辑说明</h3>
+          </div>
+          <div class="modal-body">
+            <!-- 这里放置你的逻辑说明内容 -->
+          </div>
+          <div class="modal-footer">
+            <button class="close-btn">关闭</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 版本记录模态框 -->
+      <div id="versionModal" class="modal-overlay">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">版本记录</h3>
+          </div>
+
+          <div class="p-6">
+            <div class="border-l-4 border-primary pl-4">
+              <div class="flex justify-between items-start mb-1">
+                <h4 class="font-medium text-neutral-800">V1.0.1</h4>
+                <span class="text-xs text-neutral-500">2025-10-17</span>
+              </div>
+              <ul class="text-sm text-neutral-600 space-y-1">
+                <li>• 新增检索条件：订单号、参考号、跟踪号、运输方式</li>
+                <li>• 主表新增属性：参考号、跟踪号、运输方式</li>
+                <li>• 删除列表按钮列</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="p-6">
+            <div class="border-l-4 border-neutral-300 pl-4">
+                <div class="flex justify-between items-start mb-1">
+                  <h4 class="font-medium text-neutral-800">V1.0.0</h4>
+                  <span class="text-xs text-neutral-500">2025-10-15</span>
+                </div>
+                <ul class="text-sm text-neutral-600 space-y-1">
+                  <li>• 新增原型</li>
+                </ul>
+              </div>
+          </div>      
+
+          <div class="modal-footer">
+            <button class="close-btn">关闭</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    
+    <!-- 获取模板模态框 -->
+    <div id="getTemplateModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-md shadow-lg overflow-hidden max-w-md w-full mx-auto">
+        <div class="bg-primary text-white p-3 flex justify-between items-center">
+          <h3 class="text-lg font-medium">编辑模板</h3>
+          <button class="close-modal-btn ml-auto text-white hover:text-neutral-200">
+            <i class="fa fa-times"></i>
+          </button>
+        </div>
+        <div class="p-4">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-neutral-700 mb-1">模板名称 <span class="text-danger">*</span></label>
+              <input type="text" id="template-name" placeholder="请输入模板名称" class="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-neutral-700 mb-1">适用部门 <span class="text-danger">*</span></label>
+              <select id="template-department" class="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                <option value="">请选择部门</option>
+                <option value="市场部">市场部</option>
+                <option value="财务部">财务部</option>
+                <option value="人力资源部">人力资源部</option>
+                <option value="技术部">技术部</option>
+                <option value="运营部">运营部</option>
+                <option value="销售部">销售部</option>
+                <option value="客服部">客服部</option>
+              </select>
+            </div>
+            <!-- <div>
+              <label class="block text-sm font-medium text-neutral-700 mb-1">Access Token <span class="text-danger">*</span></label>
+              <input type="password" id="access-token" placeholder="请输入Access Token" class="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+            </div> -->
+          </div>
+        </div>
+        <div class="p-3 flex justify-end gap-2 border-t border-neutral-200">
+          <button class="close-modal-btn erp-btn erp-btn-secondary" onclick="closeModal()">取消</button>
+          <button id="confirm-get-template" class="erp-btn erp-btn-primary">确认</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM元素获取
+      const searchInput = document.getElementById('template-search');
+      const searchBtn = document.getElementById('search-btn');
+      const resetBtn = document.getElementById('reset-btn');
+      const tableRows = document.querySelectorAll('.template-row');
+      const useTemplateBtns = document.querySelectorAll('.use-template');
+      const getTemplateBtn = document.getElementById('get-template-btn');
+      const getTemplateModal = document.getElementById('getTemplateModal');
+      const closeModalBtns = document.querySelectorAll('.close-modal-btn');
+      const confirmGetTemplateBtn = document.getElementById('confirm-get-template');
+
+      
+      // 搜索功能实现
+      searchBtn.addEventListener('click', performSearch);
+      
+      // 回车键触发搜索
+      searchInput.addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+          performSearch();
+        }
+      });
+      
+      // 重置按钮点击事件
+      resetBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        tableRows.forEach(row => {
+          row.style.display = '';
+        });
+      });
+      
+      // 执行搜索的函数
+      function performSearch() {
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        
+        if (searchTerm === '') {
+          // 如果搜索词为空，显示所有行
+          tableRows.forEach(row => {
+            row.style.display = '';
+          });
+          return;
+        }
+        
+        // 根据搜索词筛选行
+        tableRows.forEach(row => {
+          const templateName = row.getAttribute('data-name').toLowerCase();
+          if (templateName.includes(searchTerm)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      }
+      
+      // 编辑按钮点击事件，显示编辑弹窗
+        useTemplateBtns.forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const row = this.closest('tr');
+            const templateId = row.getAttribute('data-template');
+            const templateName = row.getAttribute('data-name');
+            const department = row.querySelector('td:nth-child(3)').textContent;
+            
+            // 设置当前编辑的模板ID
+            getTemplateModal.setAttribute('data-template-id', templateId);
+            
+            // 填充表单数据
+            document.getElementById('template-name').value = templateName;
+            const departmentSelect = document.getElementById('template-department');
+            departmentSelect.value = department;
+            
+            // 显示编辑弹窗
+            getTemplateModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+          });
+        });
+      
+      // 显示获取模板模态框（如果按钮存在）
+      if (getTemplateBtn) {
+        getTemplateBtn.addEventListener('click', function() {
+          getTemplateModal.classList.remove('hidden');
+          // 禁止背景滚动
+          document.body.style.overflow = 'hidden';
+        });
+      }
+      
+      // 清除输入和错误状态
+      function closeModal() {
+        getTemplateModal.classList.add('hidden');
+        // 恢复背景滚动
+        document.body.style.overflow = '';
+        // 清除输入和错误状态
+        const templateNameInput = document.getElementById('template-name');
+        const departmentSelect = document.getElementById('template-department');
+        
+        templateNameInput.value = '';
+        departmentSelect.value = '';
+        
+        // 清除错误样式
+        templateNameInput.classList.remove('border-danger');
+        departmentSelect.classList.remove('border-danger');
+        
+        // 清除错误提示
+        const errorMessages = document.querySelectorAll('.error-message');
+        errorMessages.forEach(msg => msg.remove());
+      }
+      
+      // 确保closeModal函数是全局的
+        window.closeModal = closeModal;
+        
+        // 绑定关闭按钮事件
+        closeModalBtns.forEach(btn => {
+          btn.addEventListener('click', closeModal);
+        });
+      
+      // 点击模态框外部关闭
+      getTemplateModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeModal();
+        }
+      });
+      
+      // 确认保存编辑按钮点击事件
+      confirmGetTemplateBtn.addEventListener('click', function() {
+        // 获取输入值
+        const templateNameInput = document.getElementById('template-name');
+        const departmentSelect = document.getElementById('template-department');
+        const templateName = templateNameInput.value.trim();
+        const department = departmentSelect.value;
+        const templateId = getTemplateModal.getAttribute('data-template-id');
+        
+        // 验证必填项
+        let isValid = true;
+        
+        // 验证模板名称
+        if (!templateName) {
+          isValid = false;
+          templateNameInput.classList.add('border-danger');
+          if (!templateNameInput.nextElementSibling || !templateNameInput.nextElementSibling.classList.contains('error-message')) {
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'error-message text-danger text-xs mt-1';
+            errorMsg.textContent = '模板名称不能为空';
+            templateNameInput.parentNode.appendChild(errorMsg);
+          }
+        } else {
+          templateNameInput.classList.remove('border-danger');
+          const errorMsg = templateNameInput.nextElementSibling;
+          if (errorMsg && errorMsg.classList.contains('error-message')) {
+            errorMsg.remove();
+          }
+        }
+        
+        // 验证适用部门
+        if (!department) {
+          isValid = false;
+          departmentSelect.classList.add('border-danger');
+          if (!departmentSelect.nextElementSibling || !departmentSelect.nextElementSibling.classList.contains('error-message')) {
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'error-message text-danger text-xs mt-1';
+            errorMsg.textContent = '请选择适用部门';
+            departmentSelect.parentNode.appendChild(errorMsg);
+          }
+        } else {
+          departmentSelect.classList.remove('border-danger');
+          const errorMsg = departmentSelect.nextElementSibling;
+          if (errorMsg && errorMsg.classList.contains('error-message')) {
+            errorMsg.remove();
+          }
+        }
+        
+        // 如果验证通过，执行保存编辑逻辑
+        if (isValid) {
+          console.log('保存编辑:', { templateId, templateName, department });
+          
+          // 更新表格中的数据
+          const row = document.querySelector(`tr[data-template="${templateId}"]`);
+          if (row) {
+            row.setAttribute('data-name', templateName);
+            row.querySelector('td:nth-child(1) label').textContent = templateName;
+            row.querySelector('td:nth-child(3)').textContent = department;
+          }
+          
+          // 显示成功提示
+          alert(`模板 "${templateName}" 编辑成功！`);
+          closeModal();
+        }
+      });
+      
+      // 添加输入框事件，开始输入时清除错误样式
+      const templateNameInput = document.getElementById('template-name');
+      if (templateNameInput) {
+        templateNameInput.addEventListener('input', function() {
+          this.classList.remove('border-danger');
+          const errorMsg = this.nextElementSibling;
+          if (errorMsg && errorMsg.classList.contains('error-message')) {
+            errorMsg.remove();
+          }
+        });
+      }
+      
+      // 适用部门选择框事件，开始选择时清除错误样式
+      const departmentSelect = document.getElementById('template-department');
+      if (departmentSelect) {
+        departmentSelect.addEventListener('change', function() {
+          this.classList.remove('border-danger');
+          const errorMsg = this.nextElementSibling;
+          if (errorMsg && errorMsg.classList.contains('error-message')) {
+            errorMsg.remove();
+          }
+        });
+      }
+      
+      // ESC键关闭模态框
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !getTemplateModal.classList.contains('hidden')) {
+          closeModal();
+        }
+      });
+
+    });
+  </script>
+</body>
+</html>

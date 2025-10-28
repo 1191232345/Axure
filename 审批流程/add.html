@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>表单填写 - ELSA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- 引入浮动按钮和模态框样式 -->
+  <link rel="stylesheet" href="floating-widgets.css"> 
+  <!-- 引入浮动按钮和模态框交互逻辑 -->
+  <script defer src="floating-widgets.js"></script>
+
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2a3b7d', // 一级菜单背景色
+            secondary: '#2A9D8F',
+            success: '#2E7D32',
+            warning: '#E65100',
+            danger: '#C62828',
+            neutral: {
+              100: '#F5F7FA',
+              200: '#E4E7EB',
+              300: '#CBD2D9',
+              400: '#9AA5B1',
+              500: '#7B8794',
+              600: '#616E7C',
+              700: '#52606D',
+              800: '#3E4C59',
+              900: '#1F2933',
+            }
+          },
+          fontFamily: {
+            sans: ['Segoe UI', 'Roboto', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            'card': '0 1px 3px rgba(0, 0, 0, 0.1)',
+            'header': '0 2px 4px rgba(0, 0, 0, 0.1)',
+            'hover': '0 4px 6px rgba(0, 0, 0, 0.1)',
+          },
+          transitionProperty: {
+            'height': 'height',
+            'spacing': 'margin, padding',
+          },
+          animation: {
+            'fadeIn': 'fadeIn 0.3s ease-in-out',
+            'slideDown': 'slideDown 0.3s ease-out',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideDown: {
+              '0%': { transform: 'translateY(-10px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            },
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .table-hover-row {
+        @apply hover:bg-primary/5 transition-colors;
+      }
+      .erp-btn {
+        @apply px-3 py-1.5 rounded text-sm font-medium transition-all;
+      }
+      .erp-btn-primary {
+        @apply bg-primary text-white hover:bg-primary/90 shadow-sm hover:shadow active:shadow-inner transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200;
+      }
+      .erp-btn-secondary {
+        @apply bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-400 shadow-sm hover:shadow active:shadow-inner transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200;
+      }
+      .input-disabled {
+        @apply bg-neutral-50 cursor-not-allowed opacity-70;
+      }
+      .form-input {
+        @apply w-full px-3 py-2 text-sm border border-neutral-300 rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all duration-200;
+      }
+      .form-label {
+        @apply block text-xs text-neutral-600 mb-1.5;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-sans bg-neutral-100 text-neutral-800 min-h-screen">
+  <!-- 顶部导航栏 -->
+  <header class="bg-primary text-white shadow-header sticky top-0 z-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-14">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <!-- <i class="fa fa-cogs text-2xl mr-2"></i> -->
+            <span class="text-lg font-semibold">ELSA</span>
+          </div>
+          <nav class="hidden md:ml-10 md:flex md:space-x-1">
+            <a href="#" class="px-3 py-2 text-sm hover:bg-primary/80 transition-colors">首页</a>
+            <a href="#" class="px-3 py-2 text-sm bg-primary/80 border-b-2 border-white">流程管理</a>
+          </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <button class="p-1.5 rounded hover:bg-primary/80 transition-colors">
+              <i class="fa fa-bell-o"></i>
+              <span class="absolute top-0 right-0 w-2 h-2 bg-warning rounded-full"></span>
+            </button>
+          </div>
+          <div class="flex items-center">
+            <span class="ml-2 text-sm hidden sm:inline-block">zsw</span>
+            <i class="fa fa-angle-down ml-1 text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 二级导航 -->
+    <div class="bg-[#3686da] border-t border-white/10">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center h-10 overflow-x-auto whitespace-nowrap">
+          <a href="#" class="px-3 py-2 text-xs text-white bg-white/10 mr-1 rounded">流程发起 - 表单填写</a>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <!-- 表单导航栏 -->
+  <div id="form-nav" class="bg-white shadow-md border-t border-b border-neutral-200">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center h-12">
+        <button id="back-btn" class="text-neutral-600 hover:text-primary flex items-center transition-colors">
+          <i class="fa fa-arrow-left mr-2" onclick="window.location.href='index.html'"></i>
+          <span>返回</span>
+        </button>
+        <h2 id="form-title" class="ml-4 text-base font-medium truncate"></h2>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 表单填写区域 -->
+  <div id="form-section" class="container mx-auto px-4 sm:px-6 lg:px-8 py-5">
+    <div class="bg-white rounded shadow-card p-4 transform hover:shadow hover:-translate-y-0.5 transition-all duration-300">
+      <div id="form-content">
+        <!-- 动态生成的表单内容将在这里显示 -->
+      </div>
+    </div>
+  </div>
+  
+  <!-- 表单操作按钮区域 -->
+  <div id="form-actions" class="bg-white border-t border-neutral-200 py-3 px-4 sticky bottom-0 z-10 shadow-md">
+    <div class="container mx-auto sm:px-6 lg:px-8 flex justify-center gap-3">
+      <button class="erp-btn erp-btn-secondary" onclick="window.location.href='index.html'" >取消</button>
+      <button id="save-draft-btn" class="erp-btn erp-btn-secondary">保存</button>
+      <button id="submit-btn" class="erp-btn erp-btn-primary">提交</button>
+    </div>
+  </div>
+    
+  <!-- 浮动按钮区域 -->
+   <div class="floating-widgets">
+     <!-- 逻辑说明按钮 -->
+     <button class="floating-btn logic-btn" data-modal-id="logicModal">
+       <i class="fas fa-lightbulb"></i>
+       <span class="btn-text">逻辑说明</span>
+     </button>
+
+    <!-- 版本记录按钮 -->
+      <button class="floating-btn version-btn" data-modal-id="versionModal">
+        <i class="fas fa-history"></i>
+        <span class="btn-text">版本记录</span>
+      </button>
+  </div>
+
+  <!-- 逻辑说明模态框 -->
+  <div id="logicModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">业务逻辑说明</h3>
+      </div>
+      <div class="modal-body">
+        <ul>
+          <li>1、申请类型枚举：仓储费、操作费</li>
+          <li>2、客户代码：数据来源【客户管理 - 客户列表】</li>
+          <li>3、现价卡：【费用管理 - 仓储费/操作费】根据申请类型+客户代码检索，符合条件的生效加卡</li>
+          <li>4、目标价卡：【费用管理 - 仓储费/操作费】根据申请类型，筛选所有生效的价卡</li>
+          <li>5、价卡详情：根据选择的’目标价卡‘，展示加卡详情</li>
+          <li>6、调整原因：字符型，支持填写上限512个字符</li>
+          <li>7、附件上传：最大上传附件量5个，限制常见文件格式</li>
+          <li>8、审批步骤：根据选择的审批方案，展示流程节点</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button class="close-btn">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 版本记录模态框 -->
+  <div id="versionModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">版本记录</h3>
+      </div>
+
+      <div class="p-6">
+        <div class="border-l-4 border-primary pl-4">
+          <div class="flex justify-between items-start mb-1">
+            <h4 class="font-medium text-neutral-800">V1.0.1</h4>
+            <span class="text-xs text-neutral-500">2025-10-17</span>
+          </div>
+          <ul class="text-sm text-neutral-600 space-y-1">
+            <li>• 新增检索条件：订单号、参考号、跟踪号、运输方式</li>
+            <li>• 主表新增属性：参考号、跟踪号、运输方式</li>
+            <li>• 删除列表按钮列</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="p-6">
+        <div class="border-l-4 border-neutral-300 pl-4">
+            <div class="flex justify-between items-start mb-1">
+              <h4 class="font-medium text-neutral-800">V1.0.0</h4>
+              <span class="text-xs text-neutral-500">2025-10-15</span>
+            </div>
+            <ul class="text-sm text-neutral-600 space-y-1">
+              <li>• 新增原型</li>
+            </ul>
+          </div>
+      </div>      
+
+      <div class="modal-footer">
+        <button class="close-btn">关闭</button>
+      </div>
+    </div>
+  </div>
+  
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM元素获取
+      const formTitle = document.getElementById('form-title');
+      const formContent = document.getElementById('form-content');
+      const saveDraftBtn = document.getElementById('save-draft-btn');
+      const submitBtn = document.getElementById('submit-btn');
+      
+      let currentTemplate = null;
+      let isApprovalStepsVisible = true;
+      
+      // 从URL获取模板信息
+      function getTemplateFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const templateId = urlParams.get('template');
+        const templateName = urlParams.get('name');
+        
+        return templateId && templateName ? {
+          id: templateId,
+          name: templateName
+        } : null;
+      }
+      
+      // 初始化页面
+      function initPage() {
+        currentTemplate = getTemplateFromUrl();
+        
+        if (!currentTemplate) {
+          formContent.innerHTML = '<div class="text-center text-neutral-500 py-8">未找到有效的表单模板</div>';
+          formTitle.textContent = '表单填写';
+          return;
+        }
+        
+        // 更新页面标题
+        formTitle.textContent = `${currentTemplate.name} - 填写表单`;
+        
+        // 生成动态表单内容
+        generateFormContent(currentTemplate.id);
+      }
+      
+      // 保存草稿按钮点击事件
+      saveDraftBtn.addEventListener('click', function() {
+        // 显示保存成功的视觉反馈
+        showNotification('草稿已保存！', 'success');
+      });
+      
+      // 生成随机审批单号
+      function generateApprovalNumber() {
+        // 根据模板类型生成不同前缀的单号
+        const prefix = 'PRC'; // Price Card 的缩写
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        // 生成3位随机数
+        const random = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+        
+        return `${prefix}${year}${month}${day}${random}`;
+      }
+      
+      // 提交申请按钮点击事件
+      submitBtn.addEventListener('click', function() {
+        // 生成审批单号
+        const approvalNumber = generateApprovalNumber();
+        
+        // 收集表单数据
+        const formData = {
+          id: approvalNumber,
+          title: currentTemplate.name,
+          creator: 'zsw',
+          department: '产品部',
+          createTime: new Date().toLocaleString('zh-CN'),
+          status: 'pending', // 待审批状态
+          templateId: currentTemplate.id
+        };
+        
+        // 保存到localStorage，以便在sp_index页面使用
+        localStorage.setItem('newApprovalData', JSON.stringify(formData));
+        
+        showNotification(`您的${currentTemplate.name}已提交，审批单号: ${approvalNumber}，等待审批！`, 'success');
+        // 提交后延迟返回列表页面，让用户看到通知
+        setTimeout(() => {
+          window.location.href = 'sp_index.html?newApproval=true';
+        }, 1500);
+      });
+      
+      // 显示通知函数
+      function showNotification(message, type = 'info') {
+        // 创建通知元素
+        const notification = document.createElement('div');
+        
+        // 设置样式和内容
+        const bgColor = type === 'success' ? 'bg-success' : 
+                        type === 'error' ? 'bg-danger' : 
+                        type === 'warning' ? 'bg-warning' : 'bg-primary';
+        
+        notification.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded shadow-lg z-50 animate-fadeIn flex items-center`;
+        notification.innerHTML = `
+          <i class="fa fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} mr-2"></i>
+          <span>${message}</span>
+        `;
+        
+        // 添加到页面
+        document.body.appendChild(notification);
+        
+        // 自动移除
+        setTimeout(() => {
+          notification.style.opacity = '0';
+          notification.style.transition = 'opacity 0.3s ease-out';
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
+      
+      // 根据模板类型生成表单内容
+      function generateFormContent(templateId) {
+        // 添加申请人信息区域（所有表单通用）
+        formContent.innerHTML += `
+          <div class="border-b border-neutral-200 pb-4 mb-4 animate-fadeIn">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="form-label">申请人</label>
+                <input type="text" value="zsw" class="form-input input-disabled">
+              </div>
+              <div>
+                <label class="form-label">部门</label>
+                <input type="text" value="产品部" class="form-input input-disabled">
+              </div>
+              <div>
+                <label class="form-label">申请日期</label>
+                <input type="text" value="${new Date().toLocaleDateString('zh-CN')}" class="form-input input-disabled">
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // 根据模板类型生成对应的表单内容
+        switch(templateId) {
+          case 'priceCard':
+            generatePriceCardForm();
+            break;
+          default:
+            formContent.innerHTML += '<div class="text-center text-neutral-500 py-8">未找到对应的表单模板</div>';
+        }
+        
+        // 添加附件上传区域（所有表单通用）
+        formContent.innerHTML += `
+          <div class="border-b border-neutral-200 pb-4 mb-4 animate-fadeIn">
+            <h3 class="text-base font-medium text-neutral-800 mb-3">附件上传</h3>
+            <div id="upload-area" class="border-2 border-dashed border-neutral-300 rounded p-6 text-center hover:border-primary transition-colors cursor-pointer bg-neutral-50 hover:bg-neutral-100 transform hover:-translate-y-0.5 transition-all duration-200">
+              <input type="file" multiple id="file-upload" class="hidden">
+              <i class="fa fa-cloud-upload text-3xl text-neutral-400 mb-2"></i>
+              <p class="text-sm text-neutral-600 mb-1">点击或拖拽文件到此处上传</p>
+              <p class="text-xs text-neutral-500">支持PDF、Word、Excel格式，单个文件不超过10MB</p>
+            </div>
+            <div id="file-list" class="mt-3 hidden">
+              <h4 class="text-xs font-medium text-neutral-600 mb-2">已上传文件：</h4>
+              <div id="file-items" class="flex flex-wrap gap-2"></div>
+            </div>
+          </div>
+        `;
+        
+        // 添加审批方案选择区域（所有表单通用）
+        formContent.innerHTML += `
+          <div class="border-b border-neutral-200 pb-4 mb-4 animate-fadeIn">
+            <h3 class="text-base font-medium text-neutral-800 mb-3">审批方案</h3>
+            
+            <!-- 审批模板选择区域 -->
+            <div class="mb-4">
+              <select id="approval-plan" class="form-input">
+                <option value="plan1">标准审批流程</option>
+                <option value="plan2">快速审批流程</option>
+                <option value="plan3">特殊审批流程</option>
+              </select>
+            </div>
+            
+            <!-- 流程预览区域 -->
+            <div id="approval-process-preview" class="bg-neutral-50 p-4 rounded-md">
+              <h4 class="text-sm font-medium text-neutral-700 mb-3">流程预览</h4>
+              <div id="preview-content" class="space-y-3">
+                <!-- 审批流程步骤将动态渲染到这里 -->
+                <div class="text-center text-neutral-500 py-4">
+                  <p class="text-sm">请选择审批方案查看流程</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // 添加备注区域（所有表单通用）
+        formContent.innerHTML += `
+          <div class="animate-fadeIn">
+            <h3 class="text-base font-medium text-neutral-800 mb-3">备注</h3>
+            <textarea class="form-input min-h-[80px]" placeholder="请输入备注信息..."></textarea>
+          </div>
+        `;
+        
+        // 添加保存为模板模态框
+        document.body.innerHTML += `
+          <div id="saveTemplateModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-md shadow-lg overflow-hidden max-w-md w-full mx-auto">
+              <div class="bg-primary text-white p-3">
+                <h3 class="text-lg font-medium">保存为流程模板</h3>
+              </div>
+              <div class="p-4">
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-neutral-700 mb-1">模板名称 <span class="text-danger">*</span></label>
+                  <input type="text" id="template-name-input" placeholder="请输入模板名称" class="w-full px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+                  <div id="template-name-error" class="hidden text-danger text-xs mt-1">请输入模板名称</div>
+                </div>
+              </div>
+              <div class="p-3 flex justify-end gap-2 border-t border-neutral-200">
+                <button id="cancel-save-template" class="erp-btn erp-btn-secondary">取消</button>
+                <button id="confirm-save-template" class="erp-btn erp-btn-primary">确认保存</button>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // 初始化通用功能
+        initCommonFormFunctions();
+      }
+      
+      // 初始化通用表单功能
+        function initCommonFormFunctions() {
+          // 文件上传功能
+          const uploadArea = document.getElementById('upload-area');
+          const fileUpload = document.getElementById('file-upload');
+          const fileList = document.getElementById('file-list');
+          const fileItems = document.getElementById('file-items');
+          
+          uploadArea.addEventListener('click', () => fileUpload.click());
+          
+          uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('border-primary');
+          });
+          
+          uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('border-primary');
+          });
+          
+          uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('border-primary');
+            handleFiles(e.dataTransfer.files);
+          });
+          
+          fileUpload.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+          });
+          
+          function handleFiles(files) {
+            if (files.length > 0) {
+              fileList.classList.remove('hidden');
+              
+              Array.from(files).forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'px-3 py-1.5 bg-neutral-100 rounded text-sm flex items-center transform hover:bg-neutral-200 transition-colors';
+                fileItem.innerHTML = `
+                  <i class="fa fa-file-o mr-2 text-neutral-500"></i>
+                  <span class="truncate max-w-[150px]">${file.name}</span>
+                  <button type="button" class="ml-1.5 text-neutral-500 hover:text-danger transition-colors"><i class="fa fa-times"></i></button>
+                `;
+                
+                // 添加删除按钮事件
+                fileItem.querySelector('button').addEventListener('click', function() {
+                  fileItem.style.opacity = '0';
+                  fileItem.style.transition = 'opacity 0.3s ease-out';
+                  setTimeout(() => fileItem.remove(), 300);
+                  
+                  // 如果没有文件了，隐藏文件列表
+                  if (fileItems.children.length <= 1) {
+                    setTimeout(() => {
+                      fileList.classList.add('hidden');
+                    }, 300);
+                  }
+                });
+                
+                fileItems.appendChild(fileItem);
+              });
+            }
+          }
+          
+          // 审批方案相关元素
+          const approvalPlan = document.getElementById('approval-plan');
+          
+          // 审批方案数据
+          const approvalPlans = {
+            plan1: [
+              { name: '部门经理审批', approver: '张经理', duration: '1个工作日' },
+              { name: '财务审核', approver: '王财务', duration: '1个工作日' },
+              { name: '总经理审批', approver: '李总经理', duration: '2个工作日' }
+            ],
+            plan2: [
+              { name: '部门经理审批', approver: '张经理', duration: '0.5个工作日' },
+              { name: '财务审核', approver: '王财务', duration: '0.5个工作日' }
+            ],
+            plan3: [
+              { name: '部门经理预审', approver: '张经理', duration: '0.5个工作日' },
+              { name: '法务审核', approver: '赵法务', duration: '1个工作日' },
+              { name: '财务审核', approver: '王财务', duration: '1个工作日' },
+              { name: '总经理审批', approver: '李总经理', duration: '2个工作日' },
+              { name: '董事长审批', approver: '陈董事长', duration: '3个工作日' }
+            ]
+          };
+          
+          // 保存为流程模板按钮点击事件
+          document.getElementById('save-as-template-btn').addEventListener('click', function() {
+            const saveTemplateModal = document.getElementById('saveTemplateModal');
+            const templateNameInput = document.getElementById('template-name-input');
+            const templateNameError = document.getElementById('template-name-error');
+            
+            // 重置表单
+            templateNameInput.value = '';
+            templateNameInput.classList.remove('border-danger');
+            templateNameError.classList.add('hidden');
+            
+            // 显示模态框
+            saveTemplateModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            // 聚焦输入框
+            setTimeout(() => {
+              templateNameInput.focus();
+            }, 100);
+          });
+          
+          // 取消保存模板
+          document.getElementById('cancel-save-template').addEventListener('click', function() {
+            document.getElementById('saveTemplateModal').classList.add('hidden');
+            document.body.style.overflow = '';
+          });
+          
+          // 确认保存模板
+          document.getElementById('confirm-save-template').addEventListener('click', function() {
+            const templateNameInput = document.getElementById('template-name-input');
+            const templateNameError = document.getElementById('template-name-error');
+            const templateName = templateNameInput.value.trim();
+            
+            // 验证模板名称
+            if (!templateName) {
+              templateNameInput.classList.add('border-danger');
+              templateNameError.classList.remove('hidden');
+              return;
+            }
+            
+            // 收集审批人数据
+            const templateData = {
+              name: templateName,
+              approvers: customApprovers.map((approver, index) => ({
+                index: index + 1,
+                id: approver.id,
+                name: approver.name,
+                role: approver.role,
+                duration: approver.duration
+              }))
+            };
+            
+            console.log('保存的流程模板:', templateData);
+            
+            // 显示成功通知
+            showNotification(`流程模板 "${templateName}" 保存成功！`, 'success');
+            
+            // 关闭模态框
+            document.getElementById('saveTemplateModal').classList.add('hidden');
+            document.body.style.overflow = '';
+          });
+          
+          // 模态框点击外部关闭
+          document.getElementById('saveTemplateModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+              this.classList.add('hidden');
+              document.body.style.overflow = '';
+            }
+          });
+          
+          // 输入框错误清除事件
+          document.getElementById('template-name-input').addEventListener('input', function() {
+            this.classList.remove('border-danger');
+            document.getElementById('template-name-error').classList.add('hidden');
+          });
+          
+          // ESC键关闭模态框
+          document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+              const saveTemplateModal = document.getElementById('saveTemplateModal');
+              if (!saveTemplateModal.classList.contains('hidden')) {
+                saveTemplateModal.classList.add('hidden');
+                document.body.style.overflow = '';
+              }
+            }
+          });
+      }
+      
+      // 价卡调整申请表单
+      function generatePriceCardForm() {
+        formContent.innerHTML += `
+          <div class="border-b border-neutral-200 pb-4 mb-4 animate-fadeIn">
+            <h3 class="text-base font-medium text-neutral-800 mb-3">基本信息</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="form-label"><span class="text-danger">*</span> 申请类型</label>
+                <select class="form-input">
+                  <option value="increase">仓储费</option>
+                  <option value="decrease">操作费</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="form-label"><span class="text-danger">*</span>客户代码</label>
+                <select class="form-input">
+                  <option value="all-users">DEMO</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 现价卡信息 -->
+          <div class="border-b border-neutral-200 pb-4 mb-4 animate-fadeIn">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-base font-medium text-neutral-800">现价卡信息</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+              <div>
+                <label class="form-label"><span class="text-danger">*</span>现价卡</label>
+                <div class="relative">
+                  <input type="text" step="0.01" class="form-input input-disabled" value="测试价卡1">
+                </div>
+              </div>
+            </div>
+            
+            <!-- 现价卡详情 -->
+            <div class="mt-3 bg-neutral-50 p-3 rounded-lg">
+              <h4 class="text-sm font-medium text-neutral-700 mb-2">现价卡详情</h4>
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-sm shadow-sm rounded border border-neutral-200">
+                  <thead class="bg-neutral-100">
+                    <tr>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">开始天数</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">结束天数</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">单位</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">单价</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">最低价</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-neutral-600">最高价</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-neutral-200">
+                    <tr class="hover:bg-neutral-50 transition-colors">
+                      <td class="px-3 py-2">
+                        <input type="text" value="0" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                      </td>
+                      <td class="px-3 py-2">
+                        <input type="text" value="9999" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                      </td>
+                      <td class="px-3 py-2">
+                        <input type="text" value="体积 m³" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                      </td>
+                      <td class="px-3 py-2">
+                        <input type="text" value="1³" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                      </td>
+                      <td class="px-3 py-2">
+                        <input type="text" value="10" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                      </td>
+                      <td class="px-3 py-2">
+                        <input type="text" value="100" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded input-disabled">
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 目标价卡信息 -->
+          <div class="border-b border-neutral-200 pb-4 mb-4 animate-fadeIn">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-base font-medium text-neutral-800">目标价卡信息</h3>
+            </div>
+            
+            <div class="space-y-4 mb-3">
+              <!-- 目标价卡选择 -->
+              <div>
+                <label class="form-label"><span class="text-danger">*</span>目标价卡</label>
+                <div class="flex items-center gap-2">
+                  <select id="target-pricecard" class="form-input flex-1">
+                    <option value="">请选择价卡</option>
+                    <option value="test-pricecard-2">测试价卡2</option>
+                    <option value="test-pricecard-3">测试价卡3</option>
+                    <option value="new-pricecard">添加新价卡...</option>
+                  </select>
+                </div>
+              </div>
+              
+              <!-- 新价卡名称、适用仓库、结算币种和结算周期（默认隐藏） -->
+              <div id="new-pricecard-advanced-fields" class="hidden">
+                <!-- 新价卡名称和适用仓库在同一行 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <!-- 新价卡名称输入框 -->
+                  <div id="new-pricecard-name-container">
+                    <label class="form-label"><span class="text-danger">*</span>新价卡名称</label>
+                    <input type="text" id="new-pricecard-name" class="form-input" placeholder="请输入新价卡名称">
+                  </div>
+                  
+                  <!-- 适用仓库（下拉复选Checkbox） -->
+                  <div>
+                    <label class="form-label"><span class="text-danger">*</span>适用仓库</label>
+                    <div class="relative">
+                      <!-- 下拉按钮 -->
+                      <div id="warehouse-dropdown-button" class="flex justify-between items-center p-2 bg-white border border-neutral-300 rounded cursor-pointer hover:bg-neutral-50 transition-colors">
+                        <span id="selected-warehouses-text">请选择仓库</span>
+                        <i class="fa fa-chevron-down text-xs"></i>
+                      </div>
+                      
+                      <!-- 下拉菜单（默认隐藏） -->
+                      <div id="warehouse-dropdown-menu" class="absolute left-0 right-0 mt-1 bg-white border border-neutral-300 rounded shadow-lg max-h-48 overflow-y-auto hidden z-10">
+                        <div class="p-3">
+                          <label class="inline-flex items-center mb-2">
+                            <input type="checkbox" name="warehouse" value="warehouse1" class="mr-2 warehouse-checkbox">
+                            <span>仓库1</span>
+                          </label>
+                          <label class="inline-flex items-center mb-2">
+                            <input type="checkbox" name="warehouse" value="warehouse2" class="mr-2 warehouse-checkbox">
+                            <span>仓库2</span>
+                          </label>
+                          <label class="inline-flex items-center mb-2">
+                            <input type="checkbox" name="warehouse" value="warehouse3" class="mr-2 warehouse-checkbox">
+                            <span>仓库3</span>
+                          </label>
+                          <label class="inline-flex items-center">
+                            <input type="checkbox" name="warehouse" value="warehouse4" class="mr-2 warehouse-checkbox">
+                            <span>仓库4</span>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <div id="warehouse-error" class="hidden text-danger text-xs mt-1">请至少选择一个仓库</div>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- 结算币种 -->
+                  <div>
+                    <label class="form-label"><span class="text-danger">*</span>结算币种</label>
+                    <select id="currency-select" class="form-input">
+                      <option value="CNY">人民币 (CNY)</option>
+                      <option value="USD">美元 (USD)</option>
+                      <option value="EUR">欧元 (EUR)</option>
+                      <option value="JPY">日元 (JPY)</option>
+                    </select>
+                  </div>
+                  
+                  <!-- 结算周期 -->
+                  <div>
+                    <label class="form-label"><span class="text-danger">*</span>结算周期</label>
+                    <select id="settlement-cycle" class="form-input">
+                      <option value="daily">日结</option>
+                      <option value="weekly">周结</option>
+                      <option value="biweekly">双周结</option>
+                      <option value="monthly">月结</option>
+                      <option value="quarterly">季度结</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+    
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="form-label"><span class="text-danger">*</span>生效日期</label>
+                  <input type="date" class="form-input">
+                </div>
+                <div>
+                  <label class="form-label"><span class="text-danger">*</span>失效日期</label>
+                  <input type="date" class="form-input">
+                </div>
+              </div>
+            </div>
+            </div>
+            
+            <!-- 目标价卡详情 -->
+            <div class="mt-3 bg-blue-50 p-3 rounded-lg">
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-sm shadow-sm rounded border border-neutral-200">
+                  <thead class="bg-blue-100">
+                    <tr>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-blue-700">开始天数</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-blue-700">结束天数</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-blue-700">单位</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-blue-700">单价</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-blue-700">最低价</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-blue-700">最高价</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-blue-700">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-neutral-200" id="target-pricecard-items">
+                    <tr class="hover:bg-blue-50 transition-colors">
+                        <td class="px-3 py-2">
+                        <input type="text" value="0" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded" disabled>
+                      </td>
+                      <td class="px-3 py-2">
+                        <input type="text" value="9999" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded" disabled>
+                      </td>
+                      <td class="px-3 py-2">
+                        <input type="text" value="体积 m³" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded" disabled>
+                      </td>
+                      <td class="px-3 py-2">
+                        <input type="text" value="1³" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded" disabled>
+                      </td>
+                      <td class="px-3 py-2">
+                        <input type="text" value="10" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded" disabled>
+                      </td>
+                      <td class="px-3 py-2">
+                        <input type="text" value="100" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded" disabled>
+                      </td>
+                      <td class="px-3 py-2">
+                        <button type="button" class="text-danger hover:text-red-600 transition-colors delete-price-item" disabled>
+                          <i class="fa fa-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="border-b border-neutral-200 pb-4 mb-4 animate-fadeIn">
+                <div class="mt-3 flex justify-center">
+                  <button id="add-price-item" type="button" class="text-xs px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors" disabled>
+                    <i class="fa fa-plus mr-1"></i>添加明细
+                  </button>
+                </div>
+              
+            </div>
+            <script>
+              // 目标价卡选择事件处理
+              document.   ard = this.value === 'new-price-50.p-3.rounded-lg');
+                connputs = targetPricecardDetails.querySelectorAll('input, button');
+            
+                inputs.forEach(input => {
+                  input.disabled = !isNewPricecard ipt>
+          </div>
+          
+
+          
+          <div class="border-b border-neutra          l-200 
+pb-4 mb-4 animate-fadeIn">
+            <h3="text-base font-medium text-neutral-800 mb-3">调整说aa4">
+              <   <textarea class="form-input min-h-[100px]" placeholder="请输入调整原因..."></textarea>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      
+      // 初始化页面
+      initPage();
+      
+      // 目标价卡选择逻辑
+      const targetPricecard = document.getElementById('target-pricecard');
+      const newPricecardContainer = document.getElementById('new-pricecard-name-container');
+      const newPricecardAdvancedFields = document.getElementById('new-pricecard-advanced-fields');
+      const newPricecardName = document.getElementById('new-pricecard-name');
+      const currencySelect = document.getElementById('currency-select');
+      const settlementCycle = document.getElementById('settlement-cycle');
+      const warehouseCheckboxes = document.querySelectorAll('.warehouse-checkbox');
+      const warehouseError = document.getElementById('warehouse-error');
+      
+      if (targetPricecard && newPricecardContainer && newPricecardAdvancedFields && newPricecardName) {
+        targetPricecard.addEventListener('change', function() {
+          if (this.value === 'new-pricecard') {
+            // 显示新价卡名称输入框和高级字段
+            newPricecardContainer.classList.remove('hidden');
+            newPricecardAdvancedFields.classList.remove('hidden');
+            
+            // 清空选择框的值，但不重新隐藏输入框
+            setTimeout(() => {
+              this.value = '';
+              
+              // 设置新价卡相关字段为必填项
+              newPricecardName.setAttribute('required', 'required');
+              if (currencySelect) currencySelect.setAttribute('required', 'required');
+              if (settlementCycle) settlementCycle.setAttribute('required', 'required');
+              
+              // 重置仓库错误提示
+              if (warehouseError) warehouseError.classList.add('hidden');
+            }, 100);
+          } else {
+            // 隐藏新价卡名称输入框和高级字段
+            newPricecardContainer.classList.add('hidden');
+            newPricecardAdvancedFields.classList.add('hidden');
+            
+            // 移除必填属性
+            newPricecardName.removeAttribute('required');
+            if (currencySelect) currencySelect.removeAttribute('required');
+            if (settlementCycle) settlementCycle.removeAttribute('required');
+          }
+        });
+        
+        // 为新价卡名称输入框添加验证
+        newPricecardName.addEventListener('input', function() {
+          const value = this.value.trim();
+          if (value.length === 0) {
+            this.setCustomValidity('请输入新价卡名称');
+          } else {
+            this.setCustomValidity('');
+          }
+        });
+        
+        // 为仓库checkbox添加验证和交互逻辑
+        if (warehouseCheckboxes.length > 0 && warehouseError) {
+          // 获取下拉相关元素
+          const warehouseDropdownButton = document.getElementById('warehouse-dropdown-button');
+          const warehouseDropdownMenu = document.getElementById('warehouse-dropdown-menu');
+          const selectedWarehousesText = document.getElementById('selected-warehouses-text');
+          
+          // 点击下拉按钮切换菜单显示/隐藏
+          if (warehouseDropdownButton && warehouseDropdownMenu) {
+            warehouseDropdownButton.addEventListener('click', function(e) {
+              e.stopPropagation(); // 阻止冒泡，防止触发文档点击事件
+              warehouseDropdownMenu.classList.toggle('hidden');
+              // 切换箭头方向
+              const arrow = this.querySelector('.fa-chevron-down');
+              if (arrow) {
+                if (warehouseDropdownMenu.classList.contains('hidden')) {
+                  arrow.classList.remove('fa-chevron-up');
+                  arrow.classList.add('fa-chevron-down');
+                } else {
+                  arrow.classList.remove('fa-chevron-down');
+                  arrow.classList.add('fa-chevron-up');
+                }
+              }
+            });
+            
+            // 点击页面其他区域关闭下拉菜单
+            document.addEventListener('click', function(e) {
+              if (!warehouseDropdownButton.contains(e.target) && !warehouseDropdownMenu.contains(e.target)) {
+                warehouseDropdownMenu.classList.add('hidden');
+                // 恢复箭头方向
+                const arrow = warehouseDropdownButton.querySelector('.fa-chevron-up');
+                if (arrow) {
+                  arrow.classList.remove('fa-chevron-up');
+                  arrow.classList.add('fa-chevron-down');
+                }
+              }
+            });
+            
+            // 阻止下拉菜单内的点击事件冒泡
+            warehouseDropdownMenu.addEventListener('click', function(e) {
+              e.stopPropagation();
+            });
+          }
+          
+          // 为每个checkbox添加change事件
+          warehouseCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+              validateWarehouseSelection();
+              updateSelectedWarehousesText();
+            });
+          });
+          
+          // 更新选中仓库的文本显示
+          function updateSelectedWarehousesText() {
+            if (selectedWarehousesText) {
+              const checkedBoxes = document.querySelectorAll('.warehouse-checkbox:checked');
+              const checkedCount = checkedBoxes.length;
+              
+              if (checkedCount === 0) {
+                selectedWarehousesText.textContent = '请选择仓库';
+              } else if (checkedCount <= 2) {
+                // 如果选择不超过2个，显示仓库名称
+                const names = Array.from(checkedBoxes).map(cb => cb.nextElementSibling.textContent).join('、');
+                selectedWarehousesText.textContent = names;
+              } else {
+                // 如果选择超过2个，显示数量
+                selectedWarehousesText.textContent = `已选择 ${checkedCount} 个仓库`;
+              }
+            }
+          }
+        }
+        
+        // 验证仓库选择的函数
+        function validateWarehouseSelection() {
+          const checkedCount = document.querySelectorAll('.warehouse-checkbox:checked').length;
+          if (checkedCount === 0) {
+            if (warehouseError) warehouseError.classList.remove('hidden');
+            return false;
+          } else {
+            if (warehouseError) warehouseError.classList.add('hidden');
+            return true;
+          }
+        }
+        
+        // 如果表单提交，验证仓库选择
+        document.querySelector('form')?.addEventListener('submit', function(e) {
+          if (!validateWarehouseSelection()) {
+            e.preventDefault();
+            alert('请至少选择一个适用仓库');
+          }
+        });
+      }
+      
+      // 添加价格明细逻辑
+      const addPriceItemBtn = document.getElementById('add-price-item');
+      if (addPriceItemBtn) {
+        addPriceItemBtn.addEventListener('click', function() {
+          const tbody = document.getElementById('target-pricecard-items');
+          if (tbody) {
+            const newRow = document.createElement('tr');
+            newRow.className = 'hover:bg-blue-50 transition-colors';
+            
+            newRow.innerHTML = `
+              <td class="px-3 py-2">
+                <input type="text" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded">
+              </td>
+              <td class="px-3 py-2">
+                <input type="text" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded">
+              </td>
+              <td class="px-3 py-2">
+                <input type="text" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded">
+              </td>
+              <td class="px-3 py-2">
+                <input type="text" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded">
+              </td>
+              <td class="px-3 py-2">
+                <input type="text" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded">
+              </td>
+              <td class="px-3 py-2">
+                <input type="text" class="w-full px-2 py-1.5 text-sm border border-neutral-300 rounded">
+              </td>
+              <td class="px-3 py-2">
+                <button type="button" class="text-danger hover:text-red-600 transition-colors delete-price-item">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </td>
+            `;
+            
+            tbody.appendChild(newRow);
+            
+            // 为新添加的删除按钮绑定事件
+            const deleteBtn = newRow.querySelector('.delete-price-item');
+            if (deleteBtn) {
+              deleteBtn.addEventListener('click', function() {
+                tbody.removeChild(newRow);
+              });
+            }
+          }
+        });
+      }
+      
+      // 审批流程预览功能 - 在当前代码块中直接添加
+      // 审批方案的流程步骤数据
+      const approvalPlans = {
+        'plan1': [
+          { name: '初步审核', approver: '部门主管', duration: '1天内' },
+          { name: '财务审核', approver: '财务经理', duration: '2天内' },
+          { name: '最终审批', approver: '总监', duration: '1天内' }
+        ],
+        'plan2': [
+          { name: '快速审核', approver: '部门经理', duration: '4小时内' },
+          { name: '快速审批', approver: '总监', duration: '4小时内' }
+        ],
+        'plan3': [
+          { name: '初步审核', approver: '部门主管', duration: '1天内' },
+          { name: '法务审核', approver: '法务专员', duration: '2天内' },
+          { name: '财务审核', approver: '财务经理', duration: '2天内' },
+          { name: '总监审批', approver: '总监', duration: '1天内' },
+          { name: '总经理审批', approver: '总经理', duration: '1天内' }
+        ]
+      };
+
+      // 渲染审批流程预览
+      function renderApprovalProcess(planKey) {
+        const previewContent = document.getElementById('preview-content');
+        if (!previewContent) {
+          console.log('预览内容元素未找到');
+          return;
+        }
+        
+        console.log('渲染审批流程，方案:', planKey);
+        const steps = approvalPlans[planKey] || [];
+        previewContent.innerHTML = '';
+        
+        if (steps.length === 0) {
+          previewContent.innerHTML = `
+            <div class="text-center text-neutral-500 py-4">
+              <p class="text-sm">该审批方案暂无流程步骤</p>
+            </div>
+          `;
+          return;
+        }
+        
+        steps.forEach((step, index) => {
+          const stepElement = document.createElement('div');
+          stepElement.className = 'flex items-start gap-3';
+          
+          // 步骤节点和连接线
+          let connectorHtml = '';
+          if (index < steps.length - 1) {
+            connectorHtml = `<div class="h-full w-0.5 bg-neutral-300 absolute top-5 left-[9px]"></div>`;
+          }
+          
+          stepElement.innerHTML = `
+            <div class="relative">
+              <div class="w-5 h-5 rounded-full bg-primary text-white text-xs flex items-center justify-center z-10 relative">${index + 1}</div>
+              ${connectorHtml}
+            </div>
+            <div class="flex-1 bg-white p-3 rounded border border-neutral-200 shadow-sm">
+              <div class="flex justify-between items-start">
+                <h5 class="text-sm font-medium text-neutral-800">${step.name}</h5>
+                <span class="text-xs text-neutral-500">${step.duration}</span>
+              </div>
+              <div class="mt-1 text-sm text-neutral-600">
+                <span class="text-neutral-500">审批人：</span>
+                <span>${step.approver}</span>
+              </div>
+            </div>
+          `;
+          
+          previewContent.appendChild(stepElement);
+        });
+      }
+      
+      // 直接在当前作用域添加审批方案选择框事件监听
+      // 当选择框值改变时触发渲染
+      function setupApprovalPlanListener() {
+        const approvalPlan = document.getElementById('approval-plan');
+        if (approvalPlan) {
+          console.log('找到审批方案选择框');
+          // 移除可能存在的旧事件监听器
+          approvalPlan.onchange = null;
+          // 添加新的事件监听器
+          approvalPlan.onchange = function() {
+            console.log('审批方案变更为:', this.value);
+            renderApprovalProcess(this.value);
+          };
+          
+          // 立即渲染当前选中的审批方案
+          if (approvalPlan.value) {
+            console.log('立即渲染当前选中的审批方案:', approvalPlan.value);
+            renderApprovalProcess(approvalPlan.value);
+          }
+          return true;
+        }
+        return false;
+      }
+      
+      // 立即尝试设置监听器，如果失败则通过定时器重试
+      setupApprovalPlanListener();
+      
+      // 添加轮询机制，确保在表单动态生成后也能捕获到审批方案选择框
+      let pollAttempts = 0;
+      const maxPollAttempts = 20;
+      const pollInterval = 300;
+      
+      const pollTimer = setInterval(function() {
+        pollAttempts++;
+        console.log('轮询检查审批方案选择框，第', pollAttempts, '次');
+        
+        if (setupApprovalPlanListener() || pollAttempts >= maxPollAttempts) {
+          clearInterval(pollTimer);
+          console.log(pollAttempts >= maxPollAttempts ? '轮询超时' : '监听器设置成功');
+        }
+      }, pollInterval);
+      
+      // 为表单内容更新后添加回调支持
+      window.updateApprovalPreview = function() {
+        console.log('手动触发审批流程预览更新');
+        setupApprovalPlanListener();
+      };
+      
+      // 为现有的删除按钮绑定事件
+      document.querySelectorAll('.delete-price-item').forEach(button => {
+        button.addEventListener('click', function() {
+          const row = this.closest('tr');
+          const tbody = document.getElementById('target-pricecard-items');
+          if (row && tbody) {
+            tbody.removeChild(row);
+          }
+        });
+      });
+      
+      // 添加额外的页面加载完成后的强制预览刷新
+      setTimeout(() => {
+        console.log('页面初始化完成，强制刷新审批流程预览');
+        const approvalPlan = document.getElementById('approval-plan');
+        if (approvalPlan && approvalPlan.value) {
+          renderApprovalProcess(approvalPlan.value);
+        }
+      }, 500);
+    });
+  </script>
+</body>
+</html>
