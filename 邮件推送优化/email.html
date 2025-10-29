@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>预约确认邮件 - Discovery SCM</title>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2a3b7d',
+            secondary: '#36CFC9',
+            accent: '#722ED1',
+            danger: '#F53F3F',
+            warning: '#FFAA33',
+            success: '#52C41A',
+            dark: '#333333',
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .email-container {
+        @apply max-w-2xl mx-auto;
+      }
+      .not-intended {
+        @apply border-l-4 border-danger bg-danger/5 p-4 rounded-r-md;
+      }
+    }
+  </style>
+</head>
+<body class="font-sans bg-gray-100">
+  <div class="email-container p-6 md:p-8 bg-white shadow-lg rounded-lg my-10">
+      <!-- 不在提示区域已移至邮件底部 -->
+
+    <!-- 邮件头部 -->
+    <div class="bg-primary text-white p-8 rounded-lg mb-6">
+      <div class="flex justify-between items-start mb-4">
+        <h1 class="text-xl font-bold">Dear: <span id="recipient-name">Customer</span></h1>
+      </div>
+      
+      <p class="mb-4">Customer, Welcome to Discovery SCM Reservation Center</p>
+      
+      <p class="mb-4">To make an appointment for the delivery date, Please click on the following link:</p>
+      
+      <a href="#" class="inline-block text-red-300 font-semibold px-4 py-2 mb-6 hover:underline transition-colors">
+        Click here to complete the storage reservation confirmation
+      </a>
+      
+      <h3 class="text-lg font-semibold text-red-300 mb-3">Attention:</h3>
+      <ul class="list-disc pl-5 mb-6 text-sm">
+        <li class="mb-1">- Warehouse Name: <span id="warehouse-name">DE001</span></li>
+        <li class="mb-1">- Container Number: <span id="container-number">1241212512</span></li>
+        <li class="mb-1">- The valid of the link is only for 7 days. Please appoint in advance.</li>
+        <li class="mb-1">- This is a system generated email. Please do not reply to this email.</li>
+      </ul>
+      
+      <p class="mb-4">Thank you for choosing Discovery Scm</p>
+      <p class="mb-6">Best wishes & Thanks</p>
+      
+      <div class="font-semibold">Discovery SCM</div>
+    </div>
+    
+    <!-- 不在提示区域 - 移到页脚前 -->
+    <div id="not-intended-alert" class="not-intended mt-6">
+      <div class="flex items-start gap-3">
+        <div class="text-danger mt-1">
+          <i class="fa fa-exclamation-circle text-xl"></i>
+        </div>
+        <div>
+          <h3 class="font-semibold text-danger mb-1">期望不再提示？</h3>
+          <p class="text-sm text-gray-700">若您期望不再接收此类提示，请点击下方按钮确认。</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 页脚信息 -->
+    <div class="border-t border-gray-200 pt-4">
+      <div class="flex items-center gap-2 text-gray-600 text-sm">
+        <div class="h-8 w-1 bg-primary"></div>
+        <div>
+          <p class="font-medium">Have a great day!</p>
+          <p class="font-medium">DISCOVERY SCM</p>
+          <p class="text-xs text-gray-500">This email is automatically generated, please do not reply directly.</p>
+        </div>
+      </div>
+    </div>
+    
+
+  </div>
+
+  <!-- 不在提示确认对话框 -->
+  <div id="confirmation-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 overflow-hidden">
+        <div class="p-6">
+          <div class="flex items-start gap-4">
+            <div class="text-warning mt-1">
+              <i class="fa fa-exclamation-triangle text-2xl"></i>
+            </div>
+            <div>
+              <h3 class="text-xl font-semibold text-dark mb-2">确认</h3>
+              <p class="text-gray-600">是否确认接收此类提示吗？此设置将被记录到系统中。</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-gray-50 p-4 flex justify-end gap-3">
+          <button id="cancel-action" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50">取消</button>
+          <button id="confirm-action" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90">确认</button>
+        </div>
+      </div>
+    </div>
+
+  <!-- 操作成功提示 -->
+  <div id="success-toast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-success text-white px-6 py-3 rounded-lg shadow-lg z-50 hidden">
+      <div class="flex items-center gap-2">
+        <i class="fa fa-check-circle"></i>
+        <span>操作已提交，系统已记录您的设置</span>
+      </div>
+    </div>
+
+  <script>
+    // 添加不在提示功能
+    document.addEventListener('DOMContentLoaded', function() {
+      const alertDiv = document.getElementById('not-intended-alert');
+      const confirmationModal = document.getElementById('confirmation-modal');
+      const cancelAction = document.getElementById('cancel-action');
+      const confirmAction = document.getElementById('confirm-action');
+      const successToast = document.getElementById('success-toast');
+      
+      // 不在提示模块已直接展示在页面底部，无需点击触发
+      
+      // 添加不再提示链接到不在提示区域
+      const addDontShowAgainLink = function() {
+        // 创建一个容器div用于在区域右边水平居中
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'flex justify-center items-center mt-3 ml-auto';
+        buttonContainer.style.maxWidth = '200px'; // 限制按钮区域宽度
+        
+        const dontShowAgainLink = document.createElement('a');
+        dontShowAgainLink.id = 'dont-show-again';
+        dontShowAgainLink.className = 'inline-block text-primary hover:underline text-sm py-1 px-3 bg-primary/5 rounded-full';
+        dontShowAgainLink.textContent = '不再提示';
+        dontShowAgainLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          confirmationModal.classList.remove('hidden');
+        });
+        
+        buttonContainer.appendChild(dontShowAgainLink);
+        alertDiv.querySelector('div').appendChild(buttonContainer);
+      };
+      
+      // 取消操作
+      cancelAction.addEventListener('click', function() {
+        confirmationModal.classList.add('hidden');
+      });
+      
+      // 确认操作并模拟发送到后端
+      confirmAction.addEventListener('click', function() {
+        confirmationModal.classList.add('hidden');
+        
+        // 模拟向后端发送请求
+        simulateBackendRequest().then(() => {
+          // 显示成功提示
+          successToast.classList.remove('hidden');
+          
+          // 成功后隐藏不在提示区域
+          setTimeout(() => {
+            successToast.classList.add('hidden');
+            alertDiv.classList.add('hidden');
+          }, 3000);
+        });
+      });
+      
+      // 模拟向后端发送请求的函数
+      function simulateBackendRequest() {
+        return new Promise((resolve) => {
+          // 模拟网络延迟
+          setTimeout(() => {
+            console.log('已向后端发送不再提示设置');
+            console.log('请求数据:', {
+              action: 'set_dont_show_again',
+              timestamp: new Date().toISOString(),
+              user_email: 'user@example.com', // 示例邮箱，实际应从系统获取
+              email_content_id: 'email-123',   // 示例邮件ID，实际应从系统获取
+              user_choice: 'dont_show_again'
+            });
+            resolve();
+          }, 500);
+        });
+      }
+      
+      // 初始化：添加不再提示链接
+      addDontShowAgainLink();
+      
+      // 可选：添加邮件信息编辑功能
+      const recipientName = document.getElementById('recipient-name');
+      const warehouseName = document.getElementById('warehouse-name');
+      const containerNumber = document.getElementById('container-number');
+      
+      // 双击可编辑邮件中的关键信息
+      [recipientName, warehouseName, containerNumber].forEach(element => {
+        element.addEventListener('dblclick', function() {
+          this.contentEditable = 'true';
+          this.classList.add('bg-yellow-100', 'px-1', 'rounded');
+          this.focus();
+        });
+        
+        element.addEventListener('blur', function() {
+          this.contentEditable = 'false';
+          this.classList.remove('bg-yellow-100', 'px-1', 'rounded');
+        });
+        
+        element.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            this.blur();
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

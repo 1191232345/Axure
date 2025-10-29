@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELSA-订单管理</title>
+  <!-- 引入外部资源 -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdn.tailwindcss.com">
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2a3b7d',
+            'primary-light': '#3a4ca7',
+            secondary: '#36CFC9',
+            accent: '#722ED1',
+            success: '#00B42A',
+            warning: '#FF7D00',
+            danger: '#F53F3F',
+            dark: '#1D2129',
+            'light-bg': '#FFFFFF',
+            'card-bg': '#FFFFFF',
+            border: '#E5E7EB'
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            'card': '0 2px 8px rgba(0, 0, 0, 0.05)',
+            'card-hover': '0 10px 25px -5px rgba(42, 59, 125, 0.1)',
+            'dropdown': '0 4px 16px rgba(0, 0, 0, 0.1)',
+            'header': '0 2px 4px rgba(0, 0, 0, 0.05)'
+          }
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .btn-primary {
+        @apply bg-primary text-white px-4 py-2 rounded-lg transition-all hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2;
+      }
+      .btn-secondary {
+        @apply bg-white text-primary border border-border px-4 py-2 rounded-lg transition-all hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2;
+      }
+      .input-primary {
+        @apply w-full px-4 py-2.5 rounded-lg border border-border bg-white text-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all;
+      }
+      .form-label {
+        @apply block text-sm font-medium text-gray-700 mb-1;
+      }
+      .checkbox-primary {
+        @apply w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/30;
+      }
+      .select-primary {
+        @apply w-full px-4 py-2.5 rounded-lg border border-border bg-white text-dark focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all;
+      }
+      .form-section {
+        @apply mb-6 pb-4 border-b border-border last:border-0 last:mb-0;
+      }
+      .form-row {
+        @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4;
+      }
+      .form-checkbox-row {
+        @apply flex items-center space-x-6 flex-wrap;
+      }
+      .form-checkbox-item {
+        @apply flex items-center space-x-2;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-sans bg-neutral-100 text-neutral-800 min-h-screen">
+  <!-- 顶部导航栏 -->
+  <header class="bg-primary text-white shadow-header sticky top-0 z-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-14">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <span class="text-lg font-semibold">ELSA</span>
+          </div>
+          <nav class="hidden md:ml-10 md:flex md:space-x-1">
+            <a href="../../portal.html" class="px-3 py-2 text-sm hover:bg-primary/80 transition-colors">首页</a>
+            <a href="#" class="px-3 py-2 text-sm bg-primary/80 border-b-2 border-white">订单管理</a>
+          </nav>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <button class="p-1.5 rounded hover:bg-primary/80 transition-colors">
+              <i class="fa fa-bell-o"></i>
+              <span class="absolute top-0 right-0 w-2 h-2 bg-warning rounded-full"></span>
+            </button>
+          </div>
+          <div class="flex items-center">
+            <span class="ml-2 text-sm hidden sm:inline-block">zsw</span>
+            <i class="fa fa-angle-down ml-1 text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 二级导航 -->
+    <div class="bg-[#3686da] border-t border-white/10">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center h-10 overflow-x-auto whitespace-nowrap">
+          <a href="#" class="px-3 py-2 text-xs text-white bg-white/10 mr-1 rounded">订单列表</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="container mx-auto px-4 py-6">
+    <!-- 表单卡片 -->
+    <div class="bg-white rounded shadow-card p-6 mb-6">
+      <h2 class="text-lg font-semibold mb-6">申请人信息</h2>
+      
+      <form id="applicant-form" class="space-y-6">
+        <!-- 基础信息 -->
+        <div class="form-section">
+          <h3 class="text-md font-medium text-primary mb-4">基础信息</h3>
+          
+          <div class="form-row">
+            <div>
+              <label class="form-label" for="applicant-name"disabled>客户名称</label>
+              <input type="text" id="applicant-name" class="input-primary" placeholder="请输入客户名称" value="DEMO">
+            </div>
+            <div>
+              <label class="form-label" for="contact-person">联系人</label>
+              <input type="text" id="contact-person" class="input-primary" placeholder="请输入联系人姓名" value="demo">
+            </div>
+            <div>
+              <label class="form-label" for="email">邮箱</label>
+              <input type="email" id="email" class="input-primary" placeholder="请输入邮箱地址" value="email@examplepower.com">
+            </div>
+            <div>
+              <label class="form-label" for="phone">手机号</label>
+              <input type="tel" id="phone" class="input-primary" placeholder="请输入手机号" value="13231234122">
+            </div>
+            <div>
+              <label class="form-label" for="warehouse-code">仓库代码</label>
+              <select id="submit-type" class="select-primary">
+                    <option value="online" selected>DEMO</option>
+                </select>
+            </div>
+            <div>
+              <label class="form-label" for="warehouse-code" disabled>选择仓群</label>
+              <select id="submit-type" class="select-primary">
+                    <option value="online" selected>美西仓群</option>
+                </select>
+            </div>
+            <div>
+              <label class="form-label" for="warehouse-code">入库类型</label>
+                <select id="submit-type" class="select-primary">
+                    <option value="online" selected>整柜</option>
+                </select>
+            </div>
+            <div>
+              <label class="form-label" for="reference-number">参考号</label>
+              <input type="tel" id="reference-number" class="input-primary" placeholder="请输入参考号" value="13231234122">
+            </div>
+          </div>
+        </div>
+        
+        <!-- 头部信息 -->
+        <div class="form-section">
+          <h3 class="text-md font-medium text-primary mb-4">头程信息</h3>
+
+            <div class="form-row">
+                <div>
+                  <label class="form-label" for="department">柜型</label>
+                  <select id="department" class="select-primary">
+                    <option value="tech">20GP</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="form-label" for="project">目的港</label>
+                  <select id="project" class="select-primary">
+                    <option value="project1" selected>NIS</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="form-label" for="submit-date">预计到港日期</label>
+                  <input type="date" id="submit-date" class="input-primary" placeholder="请输入提单日期" value="2021-01-01">
+                </div>
+
+                <div>
+                  <label class="form-label" for="submit-person">提单号</label>
+                  <input type="text" id="submit-person" class="input-primary" placeholder="请输入提交人姓名" value="ERA12345561">
+                </div>
+
+                <div>
+                    <label class="form-label" for="submit-type">船公司</label>
+                    <select id="submit-type" class="select-primary">
+                      <option value="online" selected>SNL</option>
+                    </select>
+                </div>
+
+                <div>
+                  <label class="form-label" for="submit-type">交货方式</label>
+                  <select id="submit-type" class="select-primary">
+                    <option value="online" selected>客户自送</option>
+                  </select>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+        
+        <!-- 审批产品列表 -->
+        <div class="bg-white rounded shadow-sm p-4 mb-6">
+          <h3 class="text-md font-medium text-primary mb-4">审批产品列表</h3>
+          
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-neutral-200 text-sm">
+              <thead class="bg-neutral-100">
+                <tr>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">产品编号</th>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">产品名称</th>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">技术说明</th>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">单位</th>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">数量</th>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">单价</th>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">金额</th>
+                  <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">操作</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-neutral-200">
+                <tr>
+                  <td class="px-3 py-3">
+                    <input type="text" class="input-primary text-sm py-1" value="selected-KY0042">
+                  </td>
+                  <td class="px-3 py-3">
+                    <input type="text" class="input-primary text-sm py-1" value="产品A">
+                  </td>
+                  <td class="px-3 py-3">
+                    <input type="text" class="input-primary text-sm py-1" value="test说明">
+                  </td>
+                  <td class="px-3 py-3">
+                    <select class="select-primary text-sm py-1">
+                      <option value="个" selected>个</option>
+                      <option value="件">件</option>
+                      <option value="套">套</option>
+                    </select>
+                  </td>
+                  <td class="px-3 py-3">
+                    <input type="number" class="input-primary text-sm py-1 w-20" value="1">
+                  </td>
+                  <td class="px-3 py-3">
+                    <input type="number" class="input-primary text-sm py-1" value="28000">
+                  </td>
+                  <td class="px-3 py-3">
+                    <input type="number" class="input-primary text-sm py-1" value="28000" readonly>
+                  </td>
+                  <td class="px-3 py-3">
+                    <button type="button" class="text-danger hover:text-danger/80">
+                      <i class="fa fa-trash-o"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="mt-4 flex justify-center">
+            <button type="button" class="btn-secondary text-sm px-3 py-1.5">
+              <i class="fa fa-plus mr-1"></i> 添加产品
+            </button>
+          </div>
+        </div>
+
+        <!-- 邮件推送设置（新增部分） -->
+        <div class="bg-white rounded shadow-sm p-4 mb-6">
+          <h3 class="text-md font-medium text-primary mb-4">邮件推送设置</h3>
+          
+          <div class="form-checkbox-row mb-4">
+            <div class="form-checkbox-item">
+              <input type="checkbox" id="notify-create" name="notifications" value="create" class="checkbox-primary" checked>
+              <label for="notify-create" class="text-sm text-gray-700">送仓预约提示</label>
+            </div>
+            <div class="form-checkbox-item">
+              <input type="checkbox" id="notify-update" name="notifications" value="update" class="checkbox-primary" checked>
+              <label for="notify-update" class="text-sm text-gray-700">预计到港通知（14天）</label>
+            </div>
+            <div class="form-checkbox-item">
+              <input type="checkbox" id="notify-approve" name="notifications" value="approve" class="checkbox-primary" checked>
+              <label for="notify-approve" class="text-sm text-gray-700">预计到港通知（7天）</label>
+            </div>
+          </div>
+          <div class="mt-4">
+              <label class="form-label" for="cc-emails-input">提醒发送邮箱</label>
+              <div class="relative">
+                <!-- 合并的输入容器 -->
+                <div id="email-input-container" class="flex flex-wrap gap-2 p-2 min-h-[40px] border border-border rounded-lg focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary">
+                  <!-- 邮箱标签会动态添加在这里 -->
+                  <input
+                    type="text" 
+                    id="cc-emails-input" 
+                    class="flex-1 min-w-[200px] outline-none text-sm" 
+                    placeholder="输入邮箱后按回车添加，最多支持10个邮箱" 
+                    autocomplete="off"
+                  >
+                </div>
+                <p class="text-xs text-gray-500 mt-1">提示：输入邮箱后按回车添加，最多支持10个邮箱</p>
+              </div>
+            </div>
+            
+            <script>
+              document.addEventListener('DOMContentLoaded', function() {
+                const emailInput = document.getElementById('cc-emails-input');
+                const container = document.getElementById('email-input-container');
+                const maxEmails = 10;
+                
+                // 默认邮箱数据
+                const defaultEmails = ['cc@example.com', 'admin@example.com'];
+                defaultEmails.forEach(email => addEmailTag(email));
+                
+                // 添加邮箱标签
+                function addEmailTag(email) {
+                  // 邮箱格式简单验证
+                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                  if (!emailRegex.test(email)) {
+                    alert('请输入有效的邮箱地址');
+                    emailInput.value = '';
+                    return;
+                  }
+                  
+                  // 检查是否已达到最大数量
+                  const currentTags = container.querySelectorAll('.email-tag');
+                  if (currentTags.length >= maxEmails) {
+                    alert(`最多只能添加${maxEmails}个邮箱`);
+                    emailInput.value = '';
+                    return;
+                  }
+                  
+                  // 检查是否已存在
+                  for (let i = 0; i < currentTags.length; i++) {
+                    const existingEmail = currentTags[i].getAttribute('data-email');
+                    if (existingEmail === email) {
+                      alert('该邮箱已存在');
+                      emailInput.value = '';
+                      return;
+                    }
+                  }
+                  
+                  // 创建标签元素
+                  const tag = document.createElement('div');
+                  tag.className = 'email-tag bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm flex items-center';
+                  tag.setAttribute('data-email', email);
+                  
+                  const tagText = document.createTextNode(email);
+                  tag.appendChild(tagText);
+                  
+                  const removeBtn = document.createElement('button');
+                  removeBtn.type = 'button';
+                  removeBtn.className = 'ml-1 text-blue-600 hover:text-blue-800';
+                  removeBtn.innerHTML = '<i class="fa fa-times"></i>';
+                  removeBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    tag.remove();
+                    // 确保输入框获得焦点
+                    emailInput.focus();
+                  };
+                  
+                  tag.appendChild(removeBtn);
+                  
+                  // 在输入框前插入标签
+                  container.insertBefore(tag, emailInput);
+                  emailInput.value = '';
+                  
+                  // 保持输入框获得焦点
+                  emailInput.focus();
+                }
+                
+                // 监听回车键
+                emailInput.addEventListener('keydown', function(e) {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const email = this.value.trim();
+                    if (email) {
+                      addEmailTag(email);
+                    }
+                  }
+                });
+                
+                // 点击容器时聚焦到输入框
+                container.addEventListener('click', function() {
+                  emailInput.focus();
+                });
+                
+                // 在表单提交时收集所有邮箱
+                document.getElementById('applicant-form').addEventListener('submit', function(e) {
+                  e.preventDefault();
+                  
+                  // 收集所有邮箱
+                  const emails = [];
+                  const tags = container.querySelectorAll('.email-tag');
+                  tags.forEach(tag => {
+                    emails.push(tag.getAttribute('data-email'));
+                  });
+                  
+                  // 如果输入框有内容且是有效邮箱，也添加进去
+                  const currentInput = emailInput.value.trim();
+                  if (currentInput && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentInput)) {
+                    emails.push(currentInput);
+                  }
+                  
+                  // 收集表单数据
+                  const formData = {
+                    // 基础信息
+                    applicantName: document.getElementById('applicant-name').value,
+                    contactPerson: document.getElementById('contact-person').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    status: document.getElementById('status').value,
+                    role: document.getElementById('role').value,
+                    
+                    // 头部信息
+                    department: document.getElementById('department').value,
+                    project: document.getElementById('project').value,
+                    priority: document.getElementById('priority').value,
+                    submitType: document.getElementById('submit-type').value,
+                    submitPerson: document.getElementById('submit-person').value,
+                    confirmPerson: document.getElementById('confirm-person').value,
+                    
+                    // 邮件推送设置
+                    notifications: Array.from(document.querySelectorAll('input[name="notifications"]:checked')).map(cb => cb.value),
+                    ccEmails: emails.join(','), // 使用逗号分隔的邮箱字符串
+                    
+                    // 备注
+                    remarks: document.getElementById('remarks').value
+                  };
+                  
+                  console.log('表单提交数据:', formData);
+                  
+                  // 显示成功消息
+                  alert('表单提交成功！');
+                });
+              });
+            </script>
+        </div>
+        
+        <!-- 备注 -->
+        <div class="form-section">
+          <h3 class="text-md font-medium text-primary mb-4">备注</h3>
+          <div>
+            <textarea id="remarks" rows="3" class="input-primary" placeholder="请输入备注信息">测试备注信息</textarea>
+          </div>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="flex justify-end gap-3 pt-4 border-t border-border">
+          <button type="button" class="btn-secondary">取消</button>
+          <button type="button" class="btn-secondary">保存草稿</button>
+          <button type="submit" class="btn-primary">提交</button>
+        </div>
+      </form>
+    </div>
+  </main>
+  
+  <!-- 联系我们按钮 -->
+  <div class="fixed bottom-6 right-6 z-50">
+    <button id="contact-us-button" class="bg-primary hover:bg-primary-light text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+      <i class="fa fa-envelope text-xl"></i>
+    </button>
+  </div>
+  
+  <script>
+     // 联系我们按钮交互
+     document.getElementById('contact-us-button').addEventListener('click', function() {
+       alert('联系方式：\n电话：400-123-4567\n邮箱：contact@elsa.com');
+     });
+   </script>
+</body>
+</html>
