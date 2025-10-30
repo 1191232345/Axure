@@ -153,7 +153,31 @@
         dontShowAgainLink.textContent = '不再提示';
         dontShowAgainLink.addEventListener('click', function(e) {
           e.preventDefault();
-          confirmationModal.classList.remove('hidden');
+          // 打开新页面进行二次确认
+          const confirmationWindow = window.open(
+            'confirm.html', 
+            '_blank', 
+            'width=500,height=400,top=100,left=100,resizable=no,scrollbars=no'
+          );
+          
+          // 监听来自确认页面的消息
+          window.addEventListener('message', function(event) {
+            if (event.origin !== window.location.origin) return;
+            
+            if (event.data.action === 'confirm_dont_show_again') {
+              // 用户在新页面确认后
+              simulateBackendRequest(event.data).then(() => {
+                // 显示成功提示
+                successToast.classList.remove('hidden');
+                
+                // 成功后隐藏不在提示区域
+                setTimeout(() => {
+                  successToast.classList.add('hidden');
+                  alertDiv.classList.add('hidden');
+                }, 3000);
+              });
+            }
+          });
         });
         
         buttonContainer.appendChild(dontShowAgainLink);
@@ -183,18 +207,42 @@
       });
       
       // 模拟向后端发送请求的函数
-      function simulateBackendRequest() {
+      function simulateBackendRequest(confirmationData = {}) {
         return new Promise((resolve) => {
           // 模拟网络延迟
           setTimeout(() => {
-            console.log('已向后端发送不再提示设置');
-            console.log('请求数据:', {
+            // 准备发送到后端的数据，合并默认数据和从确认页面传来的数据
+            const requestData = {
               action: 'set_dont_show_again',
               timestamp: new Date().toISOString(),
               user_email: 'user@example.com', // 示例邮箱，实际应从系统获取
               email_content_id: 'email-123',   // 示例邮件ID，实际应从系统获取
-              user_choice: 'dont_show_again'
-            });
+              user_choice: 'dont_show_again',
+              confirmation_time: confirmationData.timestamp || new Date().toISOString(),
+              reason: confirmationData.reason || '',
+              confirmed_by_user: true
+            };
+            
+            console.log('已向后端发送不再提示设置');
+            console.log('请求数据:', requestData);
+            
+            // 在实际项目中，这里应该使用fetch或axios等方法向后端发送请求
+            // fetch('/api/email-settings/dont-show-again', {
+            //   method: 'POST',
+            //   headers: {
+            //     'Content-Type': 'application/json'
+            //   },
+            //   body: JSON.stringify(requestData)
+            // })
+            // .then(response => response.json())
+            // .then(data => {
+            //   console.log('后端响应:', data);
+            //   resolve();
+            // })
+            // .catch(error => {
+            //   console.error('请求错误:', error);
+            // });
+            
             resolve();
           }, 500);
         });
