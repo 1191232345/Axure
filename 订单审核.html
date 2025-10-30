@@ -417,6 +417,11 @@
               disabled title="至少勾选一条数据">
               <i class="fa fa-edit mr-1.5"></i> 更新
             </button>
+            <button id="query-carrier-code-btn"
+              class="erp-btn btn-warning flex items-center justify-center px-4 py-2 bg-gray-300 text-gray-500 cursor-not-allowed text-sm"
+              disabled title="至少勾选一条数据">
+              <i class="fa fa-search mr-1.5"></i> 查询船司代码
+            </button>
 
           </div>
         </div>
@@ -831,20 +836,35 @@
     const selectAllCheckbox = document.getElementById('select-all');
     const itemCheckboxes = document.querySelectorAll('.item-checkbox');
     const updateBtn = document.getElementById('update-subaccount-btn');
+    const queryCarrierBtn = document.getElementById('query-carrier-code-btn');
 
     // 检查是否有选中的复选框
     function checkSelected() {
       const hasSelected = Array.from(itemCheckboxes).some(checkbox => checkbox.checked);
+      
+      // 更新更新按钮状态
       if (hasSelected) {
         updateBtn.disabled = false;
         updateBtn.removeAttribute('title');
         updateBtn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
         updateBtn.classList.add('bg-warning', 'text-white', 'hover:bg-warning/90', 'transition-colors', 'duration-200', 'cursor-pointer');
+        
+        // 更新查询船司代码按钮状态
+        queryCarrierBtn.disabled = false;
+        queryCarrierBtn.removeAttribute('title');
+        queryCarrierBtn.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+        queryCarrierBtn.classList.add('bg-warning', 'text-white', 'hover:bg-warning/90', 'transition-colors', 'duration-200', 'cursor-pointer');
       } else {
         updateBtn.disabled = true;
         updateBtn.setAttribute('title', '至少勾选一条数据');
         updateBtn.classList.remove('bg-warning', 'text-white', 'hover:bg-warning/90', 'transition-colors', 'duration-200', 'cursor-pointer');
         updateBtn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+        
+        // 查询船司代码按钮禁用状态
+        queryCarrierBtn.disabled = true;
+        queryCarrierBtn.setAttribute('title', '至少勾选一条数据');
+        queryCarrierBtn.classList.remove('bg-warning', 'text-white', 'hover:bg-warning/90', 'transition-colors', 'duration-200', 'cursor-pointer');
+        queryCarrierBtn.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
       }
     }
 
@@ -855,6 +875,18 @@
         checkbox.checked = isChecked;
       });
       checkSelected();
+    });
+
+    // 查询船司代码按钮点击事件
+    queryCarrierBtn.addEventListener('click', function() {
+      const selectedItems = Array.from(itemCheckboxes).filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.getAttribute('data-id'));
+      
+      if (selectedItems.length > 0) {
+        console.log('查询船司代码，选中的行ID:', selectedItems);
+        alert(`已选择 ${selectedItems.length} 条数据，开始查询船司代码...`);
+        // 实际项目中这里可以调用API进行船司代码查询
+      }
     });
 
     // 单个复选框变化

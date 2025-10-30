@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELSA一体化办公平台</title>
+  <!-- 引入外部资源 -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdn.tailwindcss.com">
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2563eb',
+            'light-bg': '#f9fafb',
+            'card-bg': '#ffffff',
+            border: '#e5e7eb'
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .bg-gradient-custom {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      }
+      .card-shadow {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      }
+      .btn-primary {
+        @apply bg-primary text-white py-2.5 px-4 rounded-lg transition-all hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50;
+      }
+      .input-primary {
+        @apply w-full pl-12 pr-4 py-2.5 rounded-lg border border-border bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all;
+      }
+      .modal-enter {
+        animation: modalEnter 0.3s ease-out forwards;
+      }
+      @keyframes modalEnter {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+    }
+  </style>
+</head>
+
+<body class="font-inter bg-gradient-custom min-h-screen">
+  <!-- 页面Header -->
+  <header class="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <!-- 左侧Logo -->
+      <div class="flex items-center">
+        <img src="https://placehold.co/100x30/e6f7ff/001529?text=DISCOVERY" alt="Logo" class="h-8">
+      </div>
+      
+      <!-- 中间标题 -->
+      <div class="text-center flex-1">
+        <h1 class="text-lg font-medium text-gray-800">ELSA一体化办公平台</h1>
+      </div>
+      
+      <!-- 右侧登录按钮 -->
+      <div class="ml-auto">
+        <button id="header-login-btn" class="bg-primary text-white py-1.5 px-4 rounded-lg hover:bg-primary/90 transition-colors">
+          登录
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容区域 -->
+  <main class="pt-20 pb-8 px-4 min-h-screen flex items-center justify-center">
+      <!-- 登录卡片 -->
+    <div class="bg-card-bg rounded-xl card-shadow w-full max-w-md overflow-hidden relative">
+    <!-- 标题区域 -->
+    <div class="p-8 pt-10">
+      <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">ELSA</h1>
+        <p class="text-gray-500">跨境物流一体化平台</p>
+      </div>
+  
+
+      
+      <!-- 登录表单 -->
+      <form id="login-form" class="pb-8">
+        <div class="mb-6 relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <i class="fa fa-user"></i>
+          </span>
+          <input type="text" id="username" value="zsw" class="input-primary" required>
+        </div>
+        <div class="mb-6 relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <i class="fa fa-lock"></i>
+          </span>
+          <input type="password" id="password" value="••••••" class="input-primary" required>
+        </div>
+        <div class="flex justify-between items-center mb-8">
+          <label class="flex items-center space-x-2 text-sm">
+            <input type="checkbox" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/30" checked>
+            <span class="text-gray-600">记住密码</span>
+          </label>
+          <div class="text-sm">
+            <button type="button" id="register-btn" class="text-primary hover:text-primary/80 transition-colors">注册</button>
+          </div>
+        </div>
+        <button type="submit" class="w-full btn-primary py-3">
+          登录
+        </button>
+      </form>
+    </div>
+    
+    <!-- 关闭按钮 -->
+    <button id="close-window-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
+      <i class="fa fa-times text-lg"></i>
+    </button>
+  </div>
+  
+  <!-- 注册弹窗 -->
+  <div id="register-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl card-shadow w-full max-w-md overflow-hidden modal-enter">
+      <!-- 弹窗头部 -->
+      <div class="p-4 border-b border-border flex justify-between items-center">
+        <h3 class="text-lg font-semibold text-gray-800">用户注册</h3>
+        <button id="close-register-modal" class="text-gray-500 hover:text-gray-700 transition-colors">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      
+      <!-- 注册表单 -->
+      <div class="p-6">
+        <form id="register-form" class="space-y-6">
+          <div class="flex items-center">
+            <label for="reg-username" class="text-sm font-medium text-gray-700 w-32"><span class="text-red-500">*</span>用户名</label>
+            <input type="text" id="reg-username" class="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" placeholder="请输入用户名" required>
+          </div>
+          <div class="flex items-center">
+            <label for="reg-email" class="text-sm font-medium text-gray-700 w-32"><span class="text-red-500">*</span>邮箱</label>
+            <input type="email" id="reg-email" class="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" placeholder="请输入邮箱" required>
+          </div>
+          <div class="flex items-center">
+            <label for="reg-phone" class="text-sm font-medium text-gray-700 w-32"><span class="text-red-500">*</span>手机号码</label>
+            <input type="text" id="reg-phone" class="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" placeholder="请输入手机号" required>
+          </div>
+          <div class="flex items-center">
+            <label for="reg-company" class="text-sm font-medium text-gray-700 w-32"><span class="text-red-500">*</span>公司名称</label>
+            <input type="text" id="reg-company" class="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" placeholder="请输入公司名称" required>
+          </div>
+          <div class="flex items-center">
+            <label for="reg-password" class="text-sm font-medium text-gray-700 w-32"><span class="text-red-500">*</span>密码</label>
+            <input type="password" id="reg-password" class="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" placeholder="请输入密码" required>
+          </div>
+          <div class="flex items-center">
+            <label for="reg-confirm-pwd" class="text-sm font-medium text-gray-700 w-32"><span class="text-red-500">*</span>确认密码</label>
+            <input type="password" id="reg-confirm-pwd" class="w-full px-4 py-2.5 rounded-lg border border-border bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" placeholder="请输入确认密码" required>
+          </div>
+          <div class="flex justify-end space-x-3">
+            <button type="button" id="cancel-register" class="px-4 py-2.5 bg-white border border-border text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+              取消
+            </button>
+            <button type="submit" class="px-4 py-2.5 btn-primary">
+              注册
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 获取元素
+      const registerBtn = document.getElementById('register-btn');
+      const registerModal = document.getElementById('register-modal');
+      const closeRegisterModal = document.getElementById('close-register-modal');
+      const closeWindowBtn = document.getElementById('close-window-btn');
+      const cancelRegisterBtn = document.getElementById('cancel-register');
+      const loginForm = document.getElementById('login-form');
+      const registerForm = document.getElementById('register-form');
+      
+      // 打开注册弹窗
+      registerBtn.addEventListener('click', function() {
+        registerModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      });
+      
+      // 关闭注册弹窗
+      closeRegisterModal.addEventListener('click', function() {
+        registerModal.classList.add('hidden');
+        document.body.style.overflow = '';
+      });
+      
+      // 取消注册按钮点击事件
+      cancelRegisterBtn.addEventListener('click', function() {
+        registerModal.classList.add('hidden');
+        document.body.style.overflow = '';
+      });
+      
+      // 点击弹窗外部关闭
+      registerModal.addEventListener('click', function(e) {
+        if (e.target === registerModal) {
+          registerModal.classList.add('hidden');
+          document.body.style.overflow = '';
+        }
+      });
+      
+      // 关闭窗口按钮
+      closeWindowBtn.addEventListener('click', function() {
+        alert('关闭窗口功能在浏览器中无法实现');
+        // 在实际桌面应用中可以使用window.close()
+      });
+      
+      // 登录表单提交
+      loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('登录成功！');
+        // 这里可以添加实际的登录逻辑
+      });
+      
+      // 为注册按钮添加点击事件（避免变量重复声明）
+      document.getElementById('register-btn').addEventListener('click', function() {
+        const registerModal = document.getElementById('register-modal');
+        registerModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      });
+      
+      // Header登录按钮点击事件
+      document.getElementById('header-login-btn').addEventListener('click', function() {
+        // 滚动到登录卡片位置
+        const loginCard = document.querySelector('.bg-card-bg.rounded-xl');
+        if (loginCard) {
+          loginCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+      
+      // 注册表单提交
+      registerForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('reg-username').value;
+        const email = document.getElementById('reg-email').value;
+        const password = document.getElementById('reg-password').value;
+        const confirmPassword = document.getElementById('reg-confirm-pwd').value;
+        
+        if (password !== confirmPassword) {
+          alert('两次输入的密码不一致');
+          return;
+        }
+        
+        alert(`注册信息：\n用户名：${username}\n邮箱：${email}`);
+        
+        // 注册成功后关闭弹窗
+        registerModal.classList.add('hidden');
+        document.body.style.overflow = '';
+        
+        // 这里可以添加实际的注册逻辑
+      });
+      
+
+    });
+  </script>
+  </main>
+</body>
+</html>
