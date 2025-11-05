@@ -41,9 +41,9 @@
           transitionTimingFunction: {
             'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)'
           }
-        },
+        }
       }
-    }
+    };
   </script>
   
   <style type="text/tailwindcss">
@@ -125,18 +125,6 @@
           <h1 class="text-xl font-bold text-dark hidden sm:block">ELSA统一门户</h1>
         </div>
         
-        <!-- 中间搜索框 -->
-        <div class="hidden md:flex relative flex-1 max-w-xl mx-6 lg:mx-8">
-          <input type="text" placeholder="搜索系统..." id="system-search"
-            class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 bg-white text-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
-          >
-          <i class="fa fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-          <!-- 搜索结果下拉框 -->
-          <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-dropdown overflow-hidden z-50 max-h-80 overflow-y-auto">
-            <!-- 搜索结果会通过JS动态生成 -->
-          </div>
-        </div>
-        
         <!-- 右侧用户区域 -->
         <div class="flex items-center space-x-3 lg:space-x-5">
           <!-- 操作手册按钮 -->
@@ -215,12 +203,12 @@
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           <a href="#" class="bg-card-bg rounded-xl p-4 flex flex-col items-center justify-center text-center card-hover-lift shadow-card border border-border w-full">
-            <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2 transform transition-transform hover:scale-110">
+            <div class="w-12 h-12 rounded-full bg-[#3685DA]/10 flex items-center justify-center text-[#3685DA] mb-2 transform transition-transform hover:scale-110">
               <i class="fa fa-file-text-o text-xl"></i>
             </div>
             <span class="text-sm font-medium">预约送仓时间</span>
           <a href="#" class="bg-card-bg rounded-xl p-4 flex flex-col items-center justify-center text-center card-hover-lift shadow-card border border-border w-full">
-            <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2 transform transition-transform hover:scale-110">
+            <div class="w-12 h-12 rounded-full bg-[#3685DA]/10 flex items-center justify-center text-[#3685DA] mb-2 transform transition-transform hover:scale-110">
               <i class="fa fa-comments-o text-xl"></i>
             </div>
             <span class="text-sm font-medium">售后工单</span>
@@ -233,7 +221,7 @@
         <!-- 业务系统 -->
         <div id="business">
           <div class="flex items-center mb-5">
-            <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mr-2">
+            <div class="w-8 h-8 rounded-lg bg-[#3685DA]/10 flex items-center justify-center text-[#3685DA] mr-2">
               <i class="fa fa-briefcase"></i>
             </div>
             <h3 class="text-lg font-bold text-dark">业务系统</h3>
@@ -241,77 +229,164 @@
           
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             <!-- 系统卡片1 -->
-            <a href="#" class="block bg-card-bg rounded-xl overflow-hidden shadow-card border border-border card-hover-lift group w-full">
-              <div class="p-5">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <i class="fa fa-shopping-cart text-xl"></i>
+            <div class="bg-card-bg rounded-xl overflow-hidden shadow-card border border-border mb-4 card-hover-lift group transition-all duration-300 hover:shadow-lg cursor-pointer">
+              <!-- 标题和卡片同行展示区域 -->
+              <div class="p-5 flex items-center justify-between border-b border-border">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-[#3685DA]/10 flex items-center justify-center text-[#3685DA] group-hover:bg-[#3685DA] group-hover:text-white transition-colors">
+                    <i class="fa fa-shopping-cart text-lg"></i>
                   </div>
-                  <!-- 原星标按钮已删除 -->
+                  <div>
+                    <h4 class="font-bold text-dark text-base">ELSA</h4>
+                    <p class="text-gray-500 text-xs">产品订单及售后处理中心</p>
+                  </div>
                 </div>
-                <h4 class="font-bold text-dark mb-1 text-base">ELSA</h4>
-                <p class="text-gray-500 text-sm mb-4">产品订单及售后处理中心</p>
               </div>
               
-              
-            </a>
+              <!-- 快捷跳转功能区域 - 开发中状态 -->
+              <div class="p-4">
+                <div class="flex flex-wrap gap-2">
+                  <div class="px-4 py-2 bg-gray-100 text-gray-500 rounded-full text-sm cursor-not-allowed relative">
+                   <span class="ml-1 text-xs font-medium">快捷跳转，开发中...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
             
             <!-- 系统卡片2 -->
-            <a href="#" class="block bg-card-bg rounded-xl overflow-hidden shadow-card border border-border card-hover-lift group w-full">
-              <div class="p-5">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <i class="fa fa-credit-card text-xl"></i>
+            <div class="bg-card-bg rounded-xl overflow-hidden shadow-card border border-border mb-4 card-hover-lift group transition-all duration-300 hover:shadow-lg cursor-pointer">
+              <!-- 标题和卡片同行展示区域 -->
+              <div class="p-5 flex items-center justify-between border-b border-border">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-[#3685DA]/10 flex items-center justify-center text-[#3685DA] group-hover:bg-[#3685DA] group-hover:text-white transition-colors">
+                    <i class="fa fa-credit-card text-lg"></i>
                   </div>
-                  <!-- 原星标按钮已删除 -->
+                  <div>
+                    <h4 class="font-bold text-dark text-base">OMS</h4>
+                    <p class="text-gray-500 text-xs">客户订单接收中心</p>
+                  </div>
                 </div>
-                <h4 class="font-bold text-dark mb-1 text-base">OMS</h4>
-                <p class="text-gray-500 text-sm mb-4">客户订单接收中心</p>
               </div>
               
-            </a>
+              <!-- 快捷跳转功能区域 - 开发中状态 -->
+              <div class="p-4">
+                <div class="flex flex-wrap gap-2">
+                  <div class="px-4 py-2 bg-gray-100 text-gray-500 rounded-full text-sm cursor-not-allowed relative">
+                   <span class="ml-1 text-xs font-medium">快捷跳转，开发中...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
             
             <!-- 系统卡片3 -->
-            <a href="#" class="block bg-card-bg rounded-xl overflow-hidden shadow-card border border-border card-hover-lift group w-full">
-              <div class="p-5">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <i class="fa fa-users text-xl"></i>
+            <div class="bg-card-bg rounded-xl overflow-hidden shadow-card border border-border mb-4 card-hover-lift group transition-all duration-300 hover:shadow-lg cursor-pointer">
+              <!-- 标题和卡片同行展示区域 -->
+              <div class="p-5 flex items-center justify-between border-b border-border">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-[#3685DA]/10 flex items-center justify-center text-[#3685DA] group-hover:bg-[#3685DA] group-hover:text-white transition-colors">
+                    <i class="fa fa-users text-lg"></i>
                   </div>
-                  <!-- 原星标按钮已删除 -->
+                  <div>
+                    <h4 class="font-bold text-dark text-base">TMS</h4>
+                    <p class="text-gray-500 text-xs">尾程下单和尾程订单费用</p>
+                  </div>
                 </div>
-                <h4 class="font-bold text-dark mb-1 text-base">TMS</h4>
-                <p class="text-gray-500 text-sm mb-4">尾程下单和尾程订单费用</p>
               </div>
-            </a>
+              
+              <!-- 快捷跳转功能区域 - 开发中状态 -->
+              <div class="p-4">
+                <div class="flex flex-wrap gap-2">
+                  <div class="px-4 py-2 bg-gray-100 text-gray-500 rounded-full text-sm cursor-not-allowed relative">
+                   <span class="ml-1 text-xs font-medium">快捷跳转，开发中...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <!-- 系统卡片4 -->
-            <a href="#" class="block bg-card-bg rounded-xl overflow-hidden shadow-card border border-border card-hover-lift group w-full">
-              <div class="p-5">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <i class="fa fa-calendar text-xl"></i>
+            <div class="bg-card-bg rounded-xl overflow-hidden shadow-card border border-border mb-4 card-hover-lift group transition-all duration-300 hover:shadow-lg cursor-pointer">
+              <!-- 标题和卡片同行展示区域 -->
+              <div class="p-5 flex items-center justify-between border-b border-border">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-[#3685DA]/10 flex items-center justify-center text-[#3685DA] group-hover:bg-[#3685DA] group-hover:text-white transition-colors">
+                    <i class="fa fa-calendar text-lg"></i>
                   </div>
-                  <!-- 原星标按钮已删除 -->
+                  <div>
+                    <h4 class="font-bold text-dark text-base">Tracking</h4>
+                    <p class="text-gray-500 text-xs">轨迹查询</p>
+                  </div>
                 </div>
-                <h4 class="font-bold text-dark mb-1 text-base">Tracking</h4>
-                <p class="text-gray-500 text-sm mb-4">轨迹查询</p>
               </div>
-            </a>
+              
+              <!-- 快捷跳转功能区域 - 开发中状态 -->
+              <div class="p-4">
+                <div class="flex flex-wrap gap-2">
+                  <div class="px-4 py-2 bg-gray-100 text-gray-500 rounded-full text-sm cursor-not-allowed relative">
+                   <span class="ml-1 text-xs font-medium">快捷跳转，开发中...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-            <!-- 系统卡片4 -->
-            <a href="#" class="block bg-card-bg rounded-xl overflow-hidden shadow-card border border-border card-hover-lift group w-full">
-              <div class="p-5">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <i class="fa fa-calendar text-xl"></i>
+            <!-- 系统卡片4 - FMS -->
+            <div class="bg-card-bg rounded-xl overflow-hidden shadow-card border border-border mb-4 card-hover-lift group transition-all duration-300 hover:shadow-lg cursor-pointer">
+              <!-- 标题和卡片同行展示区域 -->
+              <div class="p-5 flex items-center justify-between border-b border-border">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-[#3685DA]/10 flex items-center justify-center text-[#3685DA] group-hover:bg-[#3685DA] group-hover:text-white transition-colors">
+                    <i class="fa fa-calendar text-lg"></i>
                   </div>
-                  <!-- 原星标按钮已删除 -->
+                  <div>
+                    <h4 class="font-bold text-dark text-base">FMS</h4>
+                    <p class="text-gray-500 text-xs">头程系统及财务模块</p>
+                  </div>
                 </div>
-                <h4 class="font-bold text-dark mb-1 text-base">车队预约</h4>
-                <p class="text-gray-500 text-sm mb-4">车队预约和管理中心</p>
+                <select class="bg-white text-sm border-2 border-red-500 rounded-md px-3 py-1.5 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" style="color: #ef4444;">
+                  <option value="" selected>*选择公司</option>
+                  <option value="company1" style="color: #000;">公司 A</option>
+                  <option value="company2" style="color: #000;">公司 B</option>
+                  <option value="company3" style="color: #000;">公司 C</option>
+                </select>
               </div>
-            </a>
+              
+              <!-- 快捷跳转功能区域 - 开发中状态 -->
+              <div class="p-4">
+                <div class="flex flex-wrap gap-2">
+                  <div class="px-4 py-2 bg-gray-100 text-gray-500 rounded-full text-sm cursor-not-allowed relative">
+                   <span class="ml-1 text-xs font-medium">快捷跳转，开发中...</span>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- 系统卡片4 - 车队预约 -->
+            <div class="bg-card-bg rounded-xl overflow-hidden shadow-card border border-border mb-4 card-hover-lift group transition-all duration-300 hover:shadow-lg cursor-pointer">
+              <!-- 标题和卡片同行展示区域 -->
+              <div class="p-5 flex items-center justify-between border-b border-border">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-[#3685DA]/10 flex items-center justify-center text-[#3685DA] group-hover:bg-[#3685DA] group-hover:text-white transition-colors">
+                    <i class="fa fa-calendar text-lg"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-dark text-base">车队预约</h4>
+                    <p class="text-gray-500 text-xs">预约管理系统</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 快捷跳转功能区域 - 开发中状态 -->
+              <div class="p-4">
+                <div class="flex flex-wrap gap-2">
+                  <div class="px-4 py-2 bg-gray-100 text-gray-500 rounded-full text-sm cursor-not-allowed relative">
+                   <span class="ml-1 text-xs font-medium">快捷跳转，开发中...</span>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+
           </div>      
         </div>
       </div>
@@ -321,35 +396,35 @@
   <!-- 联系我们按钮 -->
 <div class="fixed bottom-6 right-6 z-50">
   <!-- 联系我们按钮 -->
-  <button id="contact-us-button" class="bg-primary hover:bg-primary-light text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-    <i class="fa fa-envelope text-xl"></i>
-  </button>
+  <button id="contact-us-button" class="bg-[#3685DA] hover:bg-[#3685DA]/90 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[#3685DA] focus:ring-offset-2">
+      <i class="fa fa-envelope text-xl"></i>
+    </button>
   
   <!-- 联系方式弹窗 -->
   <div id="contact-modal" class="hidden absolute bottom-20 right-0 w-64 bg-white rounded-xl shadow-lg border border-border p-4 opacity-0 scale-95 transition-all duration-300">
     <div class="flex justify-between items-center mb-3">
-      <h4 class="font-bold text-primary">联系方式</h4>
+      <h4 class="font-bold text-[#3685DA]">联系方式</h4>
       <button id="close-contact-modal" class="text-gray-400 hover:text-gray-600 transition-colors">
         <i class="fa fa-times"></i>
       </button>
     </div>
     <div class="space-y-3">
       <div class="flex items-center">
-        <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
-          <i class="fa fa-phone"></i>
-        </div>
+        <div class="w-8 h-8 rounded-full bg-[#3685DA]/10 flex items-center justify-center text-[#3685DA] mr-3">
+            <i class="fa fa-phone"></i>
+          </div>
         <span class="text-sm">400-123-4567</span>
       </div>
       <div class="flex items-center">
-        <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
-          <i class="fa fa-envelope-o"></i>
-        </div>
+        <div class="w-8 h-8 rounded-full bg-[#3685DA]/10 flex items-center justify-center text-[#3685DA] mr-3">
+            <i class="fa fa-envelope-o"></i>
+          </div>
         <span class="text-sm">contact@elsa.com</span>
       </div>
       <div class="flex items-center">
-        <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
-          <i class="fa fa-weixin"></i>
-        </div>
+        <div class="w-8 h-8 rounded-full bg-[#3685DA]/10 flex items-center justify-center text-[#3685DA] mr-3">
+            <i class="fa fa-weixin"></i>
+          </div>
         <span class="text-sm">ELSA_official</span>
       </div>
     </div>
@@ -381,65 +456,7 @@
         }
       });
       
-      // 系统数据（用于搜索功能）
-      const systems = [
-        { name: '电商管理系统', category: '业务系统', url: '#' },
-        { name: '财务管理系统', category: '业务系统', url: '#' },
-        { name: '客户关系管理', category: '业务系统', url: '#' },
-        { name: '人力资源系统', category: '管理系统', url: '#' },
-        { name: '权限管理系统', category: '管理系统', url: '#' },
-        { name: '数据可视化平台', category: '数据系统', url: '#' },
-        { name: '开发工具平台', category: '工具系统', url: '#' },
-        { name: '审批系统', category: '快捷入口', url: '#' },
-        { name: '日程安排', category: '快捷入口', url: '#' },
-        { name: '邮件系统', category: '快捷入口', url: '#' },
-        { name: '即时通讯', category: '快捷入口', url: '#' }
-      ];
       
-      // 搜索功能实现
-      const searchInput = document.getElementById('system-search');
-      const searchResults = document.getElementById('search-results');
-      
-      if (searchInput && searchResults) {
-        searchInput.addEventListener('input', function() {
-          const searchTerm = this.value.trim().toLowerCase();
-          
-          if (searchTerm.length === 0) {
-            searchResults.classList.add('hidden');
-            return;
-          }
-          
-          const filteredSystems = systems.filter(system => 
-            system.name.toLowerCase().includes(searchTerm) || 
-            system.category.toLowerCase().includes(searchTerm)
-          );
-          
-          if (filteredSystems.length > 0) {
-            searchResults.innerHTML = '';
-            filteredSystems.forEach(system => {
-              const resultItem = document.createElement('div');
-              resultItem.className = 'px-4 py-3 hover:bg-gray-50 flex justify-between items-center cursor-pointer transition-colors';
-              resultItem.innerHTML = `
-                <div>
-                  <div class="font-medium">${system.name}</div>
-                  <div class="text-xs text-gray-500">${system.category}</div>
-                </div>
-                <i class="fa fa-angle-right text-gray-400"></i>
-              `;
-              
-              resultItem.addEventListener('click', function() {
-                window.location.href = system.url;
-              });
-              
-              searchResults.appendChild(resultItem);
-            });
-            
-            searchResults.classList.remove('hidden');
-          } else {
-            searchResults.innerHTML = '<div class="px-4 py-3 text-gray-500">未找到相关系统</div>';
-            searchResults.classList.remove('hidden');
-          }
-        });
         
         // 点击页面其他地方关闭搜索结果
         document.addEventListener('click', function(event) {
@@ -447,7 +464,6 @@
             searchResults.classList.add('hidden');
           }
         });
-      }
       
       // 联系我们按钮交互
     const contactUsButton = document.getElementById('contact-us-button');
