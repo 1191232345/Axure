@@ -132,16 +132,16 @@
         <ol class="space-y-2 text-sm">
           <li class="flex items-start">
             <span class="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center mr-1.5 text-xs mt-0.5">1</span>
-            <span class="text-gray-700">输入仓库邮编和柜号</span>
+            <span class="text-gray-700">查询预约信息</span>
           </li>
           <li class="flex items-start">
             <span class="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center mr-1.5 text-xs mt-0.5">2</span>
             <span class="text-gray-700">填写预约信息</span>
           </li>
-          <!-- <li class="flex items-start">
+          <li class="flex items-start">
             <span class="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center mr-1.5 text-xs mt-0.5">3</span>
-            <span class="text-gray-700">提交预约</span>
-          </li> -->
+            <span class="text-gray-700">提交预约（仅'待预约'和'待仓库确认'状态）</span>
+          </li>
         </ol>
         <p class="mt-3 text-xs text-gray-500 italic">提示：请按照上述步骤完成车队预约流程</p>
       </div>
@@ -193,7 +193,7 @@
 
           <!-- 查询结果提示 -->
           <div id="search-result-info" class="hidden mb-4 text-sm text-gray-600">
-            <span id="order-count"></span> 个订单与该柜号关联
+            查询到<span id="order-count"></span> 个订单
           </div>
 
           <!-- 订单卡片容器（默认隐藏） -->
@@ -235,9 +235,7 @@
               </div>
               <div class="md:col-span-1">
                 <label class="block text-xs text-gray-500 mb-1"><span class="text-red-500">*</span>邮箱</label>
-                <div id="global-email-tags" class="flex flex-wrap gap-2 px-3 py-2 border border-gray-300 rounded-md h-10 items-center">
-                  <input type="email" id="global-team-email" placeholder="输入邮箱后回车" class="team-email flex-1 min-w-[150px] px-3 py-2 outline-none">
-                </div>
+                <input type="text" id="global-team-email" placeholder="请输入车队邮箱" class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 <p id="global-email-error" class="text-red-500 text-xs mt-1 hidden">请输入有效的邮箱地址</p>
               </div>
               <div>
@@ -354,6 +352,17 @@
         }
       });
 
+      // 根据订单状态获取对应的样式类
+      function getStatusStyle(status) {
+        if (status === '待预约') {
+          return 'bg-red-100 text-red-800';
+        } else if (status === '待仓库审核') {
+          return 'bg-orange-100 text-orange-800';
+        } else {
+          return 'bg-green-100 text-green-800';
+        }
+      }
+
       // 订单数据示例
       const orderData = [
         {
@@ -363,7 +372,8 @@
           contactPerson: '张三',
           contactPhone: '13800138000',
           warehouseAddress: '北京市朝阳区建国路88号仓库A区',
-          teamName: '顺丰车队'
+          teamName: '顺丰车队',
+          status: '待预约'
         },
         {
           id: 2,
@@ -372,7 +382,18 @@
           contactPerson: '李四',
           contactPhone: '13900139000',
           warehouseAddress: '上海市浦东新区张江高科技园区博云路2号仓库B区',
-          teamName: '中通车队'
+          teamName: '中通车队',
+          status: '待仓库审核'
+        },
+        {
+          id: 3,
+          orderNo: 'ORD20241210003',
+          warehouseNo: 'WH20241210003',
+          contactPerson: '王五',
+          contactPhone: '13700137000',
+          warehouseAddress: '广州市天河区天河路385号仓库C区',
+          teamName: '韵达车队',
+          status: '待送仓'
         }
       ];
 
@@ -393,6 +414,7 @@
                 <i class="fas fa-box"></i>
               </div>
               <h3 class="text-base font-medium text-gray-800">入库单号: ${orderData.orderNo}</h3>
+                  <span class="px-2 py-0.5 text-xs rounded-full ${getStatusStyle(orderData.status)}">${orderData.status || '待预约'}</span>
             </div>
             <div class="flex items-center gap-2">
               <span class="text-sm text-gray-500">参考单号: ${orderData.warehouseNo}</span>
@@ -591,12 +613,14 @@
         const submitBtn = document.getElementById('global-submit-btn');
         
         if (submitBtn) {
-          if (deliveryMethod && warehouseTime) {
-            // 所有必填项都已填写，启用按钮
+          // 只检查必填项是否已填写
+          const hasRequiredFields = deliveryMethod && warehouseTime;
+          
+          // 逻辑：只有当所有必填项已填写时，才启用按钮
+          if (hasRequiredFields) {
             submitBtn.disabled = false;
-            submitBtn.className = 'w-full bg-primary text-white px-5 py-2 rounded-md hover:bg-primary/90 transition-colors';
+            submitBtn.className = 'w-full bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-md transition-colors';
           } else {
-            // 有必填项未填写，禁用按钮
             submitBtn.disabled = true;
             submitBtn.className = 'w-full bg-gray-300 text-gray-500 cursor-not-allowed px-5 py-2 rounded-md transition-colors';
           }
@@ -614,26 +638,26 @@
         const teamPhone = document.getElementById('global-team-phone').value;
         const teamBackupPhone = document.getElementById('global-team-backup-phone').value;
         const teamRemark = document.getElementById('global-team-remark').value;
+        const teamEmail = document.getElementById('global-team-email').value;
         
-        // 获取邮箱标签数据
-        const emailTags = document.querySelectorAll('#global-email-tags .email-tag');
-        const emails = Array.from(emailTags).map(tag => tag.getAttribute('data-email'));
+        // 获取邮箱数据（从单一输入框）
+        const emails = teamEmail ? [teamEmail] : [];
         
-        // 获取所有订单ID
-        const orderIds = orderData.map(order => order.id);
+        // 筛选状态为待预约或待仓库确认（审核）的订单
+        const pendingOrders = orderData.filter(order => 
+          order.status === '待预约' || order.status === '待仓库审核' || order.status === '待仓库确认'
+        );
         
-        // 验证表单
-        if (!deliveryMethod) {
-          alert('请选择卸货方式');
+        // 检查是否存在可提交的订单
+        if (pendingOrders.length === 0) {
+          alert('没有可提交的订单，仅支持提交状态为"待预约"和"待仓库确认"的订单');
           return;
         }
         
-        if (!warehouseTime) {
-          alert('请选择入库时间');
-          return;
-        }
+        // 获取待提交订单的ID
+        const orderIds = pendingOrders.map(order => order.id);
         
-        // 构造提交数据 - 相同柜号一次提交所有相关订单
+        // 构造提交数据 - 只提交符合状态要求的订单
         const formData = {
           containerNo,
           orderIds,
@@ -647,8 +671,9 @@
         
         console.log('全局提交订单数据:', formData);
         
-        // 模拟提交成功
-        alert(`柜号 ${containerNo} 的 ${orderIds.length} 个订单提交成功！`);
+        // 模拟提交成功，统计成功数量
+        // 显示更突出的提示信息
+        alert(`✅ 预约提交成功！\n📋 已成功提交 ${pendingOrders.length} 个订单\n⚠️ ⚠️ ⚠️ 重要提示：系统仅处理"待预约"和"待仓库确认"状态的订单 ⚠️ ⚠️ ⚠️`);
       }
       
       // 为全局表单添加事件监听
@@ -734,6 +759,17 @@
             const card = generateOrderCard(order);
             orderCardsContainer.appendChild(card);
           });
+          
+          // 显示搜索结果，隐藏空状态
+          emptyState.classList.add('hidden');
+          searchResultInfo.classList.remove('hidden');
+          orderCardsContainer.classList.remove('hidden');
+          
+          // 显示右侧预约信息面板
+          document.getElementById('reservation-info-panel').classList.remove('hidden');
+          
+          // 更新订单数量显示
+          orderCount.textContent = orderData.length;
         } else {
           console.warn('未找到订单容器元素');
         }
