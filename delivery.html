@@ -175,9 +175,9 @@
       </div>
 
       <!-- 主内容：空状态（默认） & 订单卡片列表（查询后） -->
-      <div class="flex flex-col md:flex-row gap-4 max-w-6xl mx-auto">
-        <!-- 左侧：订单卡片区域 -->
-        <div class="flex-1">
+      <div class="space-y-4 max-w-6xl mx-auto">
+        <!-- 订单卡片区域 -->
+        <div>
           <!-- 空状态（默认显示） -->
           <div id="empty-state" class="bg-white rounded-lg card-shadow p-6 flex flex-col items-center justify-center min-h-[350px] transition-fade">
             <div class="text-primary/30 text-3xl sm:text-4xl mb-4">
@@ -189,12 +189,67 @@
 
           <!-- 查询结果提示 -->
           <div id="search-result-info" class="hidden mb-4 text-sm text-gray-600">
-            <span id="order-count"></span> 个订单与该柜号关联，请为每个订单填写预约信息
+            <span id="order-count"></span> 个订单与该柜号关联
           </div>
 
           <!-- 订单卡片容器（默认隐藏） -->
           <div id="order-cards-container" class="hidden space-y-4 transition-fade">
             <!-- 订单卡片将通过JS动态生成 -->
+          </div>
+        </div>
+        
+        <!-- 下方：预约信息和车队信息 -->
+        <div id="reservation-info-panel" class="hidden bg-white rounded-lg card-shadow p-4 sm:p-5 transition-fade">
+          <h3 class="text-base font-medium text-gray-800 mb-4">预约与车队信息</h3>
+          
+          <!-- 预约信息区块 -->
+          <div class="mb-5">
+            <h4 class="text-sm font-semibold text-gray-700 mb-3">预约信息</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1"><span class="text-red-500">*</span>卸货方式</label>
+                <select id="global-delivery-method" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                  <option value="">请选择卸货方式</option>
+                  <option value="forklift">live</option>
+                  <option value="manual">drop</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1"><span class="text-red-500">*</span>入库时间 </label>
+                <input type="datetime-local" id="global-warehouse-time" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              </div>
+            </div>
+          </div>
+          
+          <!-- 车队信息区块 -->
+          <div class="mb-5">
+            <h4 class="text-sm font-semibold text-gray-700 mb-3">车队信息</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="block text-xs text-gray-500 mb-1"><span class="text-red-500">*</span>邮箱</label>
+                <div id="global-email-tags" class="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-md">
+                  <input type="email" id="global-team-email" placeholder="输入邮箱后回车" class="team-email flex-1 min-w-[150px] px-2 py-1 outline-none text-sm">
+                </div>
+                <p id="global-email-error" class="text-red-500 text-xs mt-1 hidden">请输入有效的邮箱地址</p>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">电话号码</label>
+                <input type="tel" id="global-team-phone" placeholder="请输入电话号码" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1">备用电话号</label>
+                <input type="tel" id="global-team-backup-phone" placeholder="请输入备用电话号码" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs text-gray-500 mb-1">备注</label>
+                <textarea id="global-team-remark" placeholder="请输入备注信息" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 提交按钮区域 -->
+          <div class="border-t border-gray-100 pt-4">
+            <button id="global-submit-btn" class="w-full bg-gray-300 text-gray-500 cursor-not-allowed px-5 py-2 rounded-md transition-colors" disabled>提交预约</button>
           </div>
         </div>
 
@@ -248,6 +303,9 @@
         emptyState.classList.add('hidden');
         searchResultInfo.classList.remove('hidden');
         orderCardsContainer.classList.remove('hidden');
+        
+        // 显示右侧预约信息面板
+        document.getElementById('reservation-info-panel').classList.remove('hidden');
         
         // 更新订单数量显示
         orderCount.textContent = orderData.length;
@@ -369,26 +427,7 @@
                   </div>
                 </div>
                 
-                <!-- 预约信息区块 -->
-                <div class="mb-5">
-                  <h4 class="text-sm font-semibold text-gray-700 mb-3">预约信息</h4>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label class="block text-xs text-gray-500 mb-1">卸货方式 <span class="text-red-500">*</span></label>
-                      <select class="delivery-method w-full px-3 py-2 border border-gray-300 rounded-md" data-order-id="${orderData.id}">
-                        <option value="">请选择卸货方式</option>
-                        <option value="forklift">live</option>
-                        <option value="manual">drop</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label class="block text-xs text-gray-500 mb-1">入库时间 <span class="text-red-500">*</span></label>
-                      <input type="datetime-local" class="warehouse-time w-full px-3 py-2 border border-gray-300 rounded-md" data-order-id="${orderData.id}">
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- 车队信息区块 -->
+                <!-- 车队信息区块 - 仅显示只读信息 -->
                 <div class="mb-3">
                   <h4 class="text-sm font-semibold text-gray-700 mb-3">车队信息</h4>
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -396,27 +435,6 @@
                       <label class="block text-xs text-gray-500 mb-1">车队名称</label>
                       <input type="text" value="${orderData.teamName}" class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 cursor-not-allowed" disabled>
                     </div>
-                  </div>
-                  <div class="mt-4">
-                    <label class="block text-xs text-gray-500 mb-1">邮箱</label>
-                    <div class="flex flex-wrap gap-2 email-tags-${orderData.id} p-2 border border-gray-300 rounded-md">
-                      <input type="email" placeholder="输入邮箱后回车" class="team-email flex-1 min-w-[150px] px-2 py-1 outline-none text-sm" data-order-id="${orderData.id}">
-                    </div>
-                    <p class="text-red-500 text-xs mt-1 email-error-${orderData.id} hidden">请输入有效的邮箱地址</p>
-                  </div>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div>
-                      <label class="block text-xs text-gray-500 mb-1">电话号码</label>
-                      <input type="tel" placeholder="请输入电话号码" class="team-phone w-full px-3 py-2 border border-gray-300 rounded-md" data-order-id="${orderData.id}">
-                    </div>
-                    <div>
-                      <label class="block text-xs text-gray-500 mb-1">备用电话号</label>
-                      <input type="tel" placeholder="请输入备用电话号码" class="team-backup-phone w-full px-3 py-2 border border-gray-300 rounded-md" data-order-id="${orderData.id}">
-                    </div>
-                  </div>
-                  <div class="mt-4">
-                    <label class="block text-xs text-gray-500 mb-1">备注</label>
-                    <textarea placeholder="请输入备注信息" rows="2" class="team-remark w-full px-3 py-2 border border-gray-300 rounded-md" data-order-id="${orderData.id}"></textarea>
                   </div>
                 </div>
               </div>
@@ -493,10 +511,6 @@
                 </ul>
               </div>
             </div>
-            <!-- 提交按钮区域 -->
-            <div class="border-t border-gray-100 p-4 sm:p-5 flex justify-center">
-              <button class="bg-gray-300 text-gray-500 cursor-not-allowed px-5 py-2 rounded-md transition-colors submit-btn" disabled data-order-id="${orderData.id}">提交</button>
-            </div>
           </div>
         `;
         
@@ -569,64 +583,48 @@
           });
         }
         
-        // 验证表单并更新提交按钮状态
-        function validateForm(orderId) {
-          const deliveryMethod = document.querySelector(`.delivery-method[data-order-id="${orderId}"]`).value;
-          const warehouseTime = document.querySelector(`.warehouse-time[data-order-id="${orderId}"]`).value;
-          const submitBtn = document.querySelector(`.submit-btn[data-order-id="${orderId}"]`);
-          
-          if (submitBtn) {
-            if (deliveryMethod && warehouseTime) {
-              // 所有必填项都已填写，启用按钮
-              submitBtn.disabled = false;
-              submitBtn.className = 'bg-primary text-white px-5 py-2 rounded-md hover:bg-primary/90 transition-colors submit-btn';
-            } else {
-              // 有必填项未填写，禁用按钮
-              submitBtn.disabled = true;
-              submitBtn.className = 'bg-gray-300 text-gray-500 cursor-not-allowed px-5 py-2 rounded-md transition-colors submit-btn';
-            }
-          }
-        }
-        
-        // 为必填项添加事件监听
-        const deliveryMethod = card.querySelector(`.delivery-method[data-order-id="${orderData.id}"]`);
-        const warehouseTime = card.querySelector(`.warehouse-time[data-order-id="${orderData.id}"]`);
-        
-        if (deliveryMethod) {
-          deliveryMethod.addEventListener('change', function() {
-            validateForm(orderData.id);
-          });
-        }
-        
-        if (warehouseTime) {
-          warehouseTime.addEventListener('change', function() {
-            validateForm(orderData.id);
-          });
-        }
-        
-        // 添加提交按钮事件监听
-        const submitBtn = card.querySelector(`.submit-btn[data-order-id="${orderData.id}"]`);
-        if (submitBtn) {
-          submitBtn.addEventListener('click', function() {
-            submitOrderForm(orderData.id);
-          });
-        }
+        // 移除了单个卡片的表单验证和提交逻辑，统一使用全局表单
         
         return card;
       }
       
-      // 提交订单表单
-      function submitOrderForm(orderId) {
-        // 获取当前订单的表单数据
-        const deliveryMethod = document.querySelector(`.delivery-method[data-order-id="${orderId}"]`).value;
-        const warehouseTime = document.querySelector(`.warehouse-time[data-order-id="${orderId}"]`).value;
-        const teamPhone = document.querySelector(`.team-phone[data-order-id="${orderId}"]`).value;
-        const teamBackupPhone = document.querySelector(`.team-backup-phone[data-order-id="${orderId}"]`).value;
-        const teamRemark = document.querySelector(`.team-remark[data-order-id="${orderId}"]`).value;
+      // 验证全局表单并更新提交按钮状态
+      function validateGlobalForm() {
+        const deliveryMethod = document.getElementById('global-delivery-method').value;
+        const warehouseTime = document.getElementById('global-warehouse-time').value;
+        const submitBtn = document.getElementById('global-submit-btn');
+        
+        if (submitBtn) {
+          if (deliveryMethod && warehouseTime) {
+            // 所有必填项都已填写，启用按钮
+            submitBtn.disabled = false;
+            submitBtn.className = 'w-full bg-primary text-white px-5 py-2 rounded-md hover:bg-primary/90 transition-colors';
+          } else {
+            // 有必填项未填写，禁用按钮
+            submitBtn.disabled = true;
+            submitBtn.className = 'w-full bg-gray-300 text-gray-500 cursor-not-allowed px-5 py-2 rounded-md transition-colors';
+          }
+        }
+      }
+      
+      // 全局提交订单表单
+      function submitGlobalOrderForm() {
+        // 获取柜号（相同柜号只提交一次）
+        const containerNo = document.getElementById('container-no').value;
+        
+        // 获取全局表单数据
+        const deliveryMethod = document.getElementById('global-delivery-method').value;
+        const warehouseTime = document.getElementById('global-warehouse-time').value;
+        const teamPhone = document.getElementById('global-team-phone').value;
+        const teamBackupPhone = document.getElementById('global-team-backup-phone').value;
+        const teamRemark = document.getElementById('global-team-remark').value;
         
         // 获取邮箱标签数据
-        const emailTags = document.querySelectorAll(`.email-tags-${orderId} .email-tag`);
+        const emailTags = document.querySelectorAll('#global-email-tags .email-tag');
         const emails = Array.from(emailTags).map(tag => tag.getAttribute('data-email'));
+        
+        // 获取所有订单ID
+        const orderIds = orderData.map(order => order.id);
         
         // 验证表单
         if (!deliveryMethod) {
@@ -639,9 +637,10 @@
           return;
         }
         
-        // 构造提交数据
+        // 构造提交数据 - 相同柜号一次提交所有相关订单
         const formData = {
-          orderId,
+          containerNo,
+          orderIds,
           deliveryMethod,
           warehouseTime,
           teamPhone,
@@ -650,10 +649,81 @@
           emails
         };
         
-        console.log('提交订单数据:', formData);
+        console.log('全局提交订单数据:', formData);
         
         // 模拟提交成功
-        alert('订单提交成功！');
+        alert(`柜号 ${containerNo} 的 ${orderIds.length} 个订单提交成功！`);
+      }
+      
+      // 为全局表单添加事件监听
+      const globalDeliveryMethod = document.getElementById('global-delivery-method');
+      const globalWarehouseTime = document.getElementById('global-warehouse-time');
+      const globalSubmitBtn = document.getElementById('global-submit-btn');
+      
+      if (globalDeliveryMethod) {
+        globalDeliveryMethod.addEventListener('change', validateGlobalForm);
+      }
+      
+      if (globalWarehouseTime) {
+        globalWarehouseTime.addEventListener('change', validateGlobalForm);
+      }
+      
+      if (globalSubmitBtn) {
+        globalSubmitBtn.addEventListener('click', submitGlobalOrderForm);
+      }
+      
+      // 初始化全局邮箱标签功能
+      const globalEmailInput = document.getElementById('global-team-email');
+      const globalEmailTagsContainer = document.getElementById('global-email-tags');
+      const globalEmailError = document.getElementById('global-email-error');
+      
+      if (globalEmailInput && globalEmailTagsContainer && globalEmailError) {
+        // 邮箱验证正则表达式
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        // 处理邮箱输入
+        globalEmailInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            const email = this.value.trim();
+            
+            if (email && emailRegex.test(email)) {
+              // 创建邮箱标签
+              const tag = document.createElement('div');
+              tag.className = 'email-tag bg-primary/10 text-primary px-2 py-1 rounded-md text-sm flex items-center gap-1 h-8';
+              tag.setAttribute('data-email', email);
+              
+              // 创建标签内容
+              const emailSpan = document.createElement('span');
+              emailSpan.textContent = email;
+              
+              // 创建删除按钮
+              const deleteBtn = document.createElement('button');
+              deleteBtn.type = 'button';
+              deleteBtn.className = 'delete-email ml-1 text-primary/70 hover:text-primary';
+              deleteBtn.innerHTML = '<i class="fas fa-times-circle"></i>';
+              
+              // 添加删除事件
+              deleteBtn.addEventListener('click', function() {
+                tag.remove();
+              });
+              
+              // 组装标签
+              tag.appendChild(emailSpan);
+              tag.appendChild(deleteBtn);
+              
+              // 插入到输入框之前
+              globalEmailTagsContainer.insertBefore(tag, globalEmailInput);
+              
+              this.value = '';
+            } else {
+              globalEmailError.classList.remove('hidden');
+              setTimeout(() => {
+                globalEmailError.classList.add('hidden');
+              }, 3000);
+            }
+          }
+        });
       }
 
       // 初始化页面
