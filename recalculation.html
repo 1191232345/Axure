@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>物流订单管理系统</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script>
+    // Tailwind 配置
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            success: '#00B42A',
+            danger: '#F53F3F',
+            warning: '#FF7D00',
+            gray: {
+              100: '#F2F3F5',
+              200: '#E5E6EB',
+              300: '#C9CDD4',
+              400: '#86909C',
+              500: '#4E5969',
+              600: '#272E3B',
+              700: '#1D2129',
+            }
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .table-shadow {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+      .btn-hover {
+        @apply transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5;
+      }
+      .status-dot {
+        @apply w-2 h-2 rounded-full inline-block mr-2;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-inter text-gray-700 min-h-screen">
+  <!-- 页面容器 -->
+  <div class="container mx-auto px-4 py-6 max-w-[1920px]">
+    <!-- 搜索筛选区域 -->
+    <div class="bg-white rounded-lg p-4 mb-6 shadow-sm">
+      <div class="flex flex-wrap gap-4 items-center">
+        <!-- 订单号查询 -->
+        <div class="flex items-center">
+          <label class="text-gray-500 mr-2 whitespace-nowrap">订单号</label>
+          <div class="flex border rounded-md overflow-hidden">
+            <select class="bg-gray-50 border-0 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+              <option>精确查询</option>
+              <option>模糊查询</option>
+            </select>
+            <input type="text" placeholder="请输入订单号" class="border-0 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary min-w-[180px]">
+          </div>
+        </div>
+        
+        <!-- 客户代码 -->
+        <div class="flex items-center">
+          <label class="text-gray-500 mr-2 whitespace-nowrap">客户代码</label>
+          <select class="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-white">
+            <option>DEMO - demo</option>
+          </select>
+        </div>
+        
+        <!-- 仓库 -->
+        <div class="flex items-center">
+          <label class="text-gray-500 mr-2 whitespace-nowrap">仓库</label>
+          <select class="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-white">
+            <option>请选择仓库</option>
+            <option>DE001</option>
+            <option>DE002</option>
+          </select>
+        </div>
+        
+        <!-- 配送渠道 -->
+        <div class="flex items-center">
+          <label class="text-gray-500 mr-2 whitespace-nowrap">配送渠道</label>
+          <select class="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary bg-white">
+            <option>请选择配送渠道</option>
+            <option>FEDEX_MPS</option>
+            <option>FEDEX_HOME_GROUND</option>
+          </select>
+        </div>
+        
+        <!-- 操作按钮 -->
+        <div class="ml-auto flex items-center gap-2">
+          <button class="px-4 py-2 border border-gray-200 rounded-md text-sm text-gray-500 hover:bg-gray-50 btn-hover">
+            重置
+          </button>
+          <button class="px-4 py-2 bg-primary text-white rounded-md text-sm btn-hover">
+            搜索
+          </button>
+          <button class="flex items-center text-primary text-sm hover:text-primary/80">
+            展开 <i class="fa fa-angle-down ml-1"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 订单列表区域 -->
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+      <!-- 批量操作按钮 -->
+      <div class="flex flex-wrap items-center justify-between p-4 border-b border-gray-100">
+        <div class="flex gap-3">
+          <button class="px-3 py-1.5 border border-gray-200 rounded-md text-sm text-gray-600 hover:bg-gray-50 btn-hover">
+            <i class="fa fa-repeat mr-1"></i> 批量重计
+          </button>
+          <button class="px-3 py-1.5 border border-gray-200 rounded-md text-sm text-gray-600 hover:bg-gray-50 btn-hover">
+            <i class="fa fa-download mr-1"></i> 导出
+          </button>
+          <button id="recalculateBtn" class="px-3 py-1.5 border border-gray-200 rounded-md text-sm text-gray-600 hover:bg-gray-50 btn-hover">
+            <i class="fa fa-calculator mr-1"></i> 重计明细
+          </button>
+        </div>
+        
+        <div class="flex gap-2 mt-2 sm:mt-0">
+          <button class="px-3 py-1.5 bg-primary text-white rounded-md text-sm btn-hover">
+            出库单
+          </button>
+          <button class="px-3 py-1.5 border border-gray-200 rounded-md text-sm text-gray-600 hover:bg-gray-50 btn-hover">
+            仓储费
+          </button>
+        </div>
+      </div>
+      
+      <!-- 订单表格 -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 text-left">
+              <th class="px-4 py-3 w-10"><input type="checkbox" class="rounded text-primary focus:ring-primary"></th>
+              <th class="px-4 py-3 font-medium text-gray-500">费用发生时间</th>
+              <th class="px-4 py-3 font-medium text-gray-500">下单时间</th>
+              <th class="px-4 py-3 font-medium text-gray-500">账单类型</th>
+              <th class="px-4 py-3 font-medium text-gray-500">仓库</th>
+              <th class="px-4 py-3 font-medium text-gray-500">客户代码</th>
+              <th class="px-4 py-3 font-medium text-gray-500">订单号</th>
+              <th class="px-4 py-3 font-medium text-gray-500">物流产品</th>
+              <th class="px-4 py-3 font-medium text-gray-500">计费总金额</th>
+              <th class="px-4 py-3 font-medium text-gray-500">币种</th>
+              <th class="px-4 py-3 font-medium text-gray-500">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 订单数据行 -->
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3"><input type="checkbox" class="rounded text-primary focus:ring-primary"></td>
+              <td class="px-4 py-3">2025-11-12 16:42:07</td>
+              <td class="px-4 py-3">2025-11-12 16:32:55</td>
+              <td class="px-4 py-3">出库单</td>
+              <td class="px-4 py-3">DE001</td>
+              <td class="px-4 py-3">DEMO</td>
+              <td class="px-4 py-3">DEMO-20251112-6GK8HTD...</td>
+              <td class="px-4 py-3">FEDEX_MPS</td>
+              <td class="px-4 py-3">98.667</td>
+              <td class="px-4 py-3">USD</td>
+              <td class="px-4 py-3">
+                <button class="text-primary hover:text-primary/80"><i class="fa fa-eye"></i></button>
+              </td>
+            </tr>
+            
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3"><input type="checkbox" class="rounded text-primary focus:ring-primary"></td>
+              <td class="px-4 py-3">2025-11-12 16:41:41</td>
+              <td class="px-4 py-3">2025-11-12 16:31:46</td>
+              <td class="px-4 py-3">出库单</td>
+              <td class="px-4 py-3">DE001</td>
+              <td class="px-4 py-3">DEMO</td>
+              <td class="px-4 py-3">DEMO-20251112-FIR5HCW...</td>
+              <td class="px-4 py-3">FEDEX_HOME_GROUND</td>
+              <td class="px-4 py-3">78.233</td>
+              <td class="px-4 py-3">USD</td>
+              <td class="px-4 py-3">
+                <button class="text-primary hover:text-primary/80"><i class="fa fa-eye"></i></button>
+              </td>
+            </tr>
+            
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3"><input type="checkbox" class="rounded text-primary focus:ring-primary"></td>
+              <td class="px-4 py-3">2025-11-12 16:45:14</td>
+              <td class="px-4 py-3">2025-11-12 16:30:56</td>
+              <td class="px-4 py-3">出库单</td>
+              <td class="px-4 py-3">DE001</td>
+              <td class="px-4 py-3">DEMO</td>
+              <td class="px-4 py-3">DEMO-20251112-P4GL5WI...</td>
+              <td class="px-4 py-3">FEDEX_HOME_GROUND</td>
+              <td class="px-4 py-3">20.173</td>
+              <td class="px-4 py-3">USD</td>
+              <td class="px-4 py-3">
+                <button class="text-primary hover:text-primary/80"><i class="fa fa-eye"></i></button>
+              </td>
+            </tr>
+            
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3"><input type="checkbox" class="rounded text-primary focus:ring-primary"></td>
+              <td class="px-4 py-3">2025-11-12 16:23:14</td>
+              <td class="px-4 py-3">2025-11-12 16:10:00</td>
+              <td class="px-4 py-3">出库单</td>
+              <td class="px-4 py-3">DE001</td>
+              <td class="px-4 py-3">DEMO</td>
+              <td class="px-4 py-3">DEMO-20251112-U7548MZ0...</td>
+              <td class="px-4 py-3">FEDEX_MPS</td>
+              <td class="px-4 py-3">121.457</td>
+              <td class="px-4 py-3">USD</td>
+              <td class="px-4 py-3">
+                <button class="text-primary hover:text-primary/80"><i class="fa fa-eye"></i></button>
+              </td>
+            </tr>
+            
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3"><input type="checkbox" class="rounded text-primary focus:ring-primary"></td>
+              <td class="px-4 py-3">2025-11-12 16:22:30</td>
+              <td class="px-4 py-3">2025-11-12 16:09:00</td>
+              <td class="px-4 py-3">出库单</td>
+              <td class="px-4 py-3">DE001</td>
+              <td class="px-4 py-3">DEMO</td>
+              <td class="px-4 py-3">DEMO-20251112-LEQH7HR...</td>
+              <td class="px-4 py-3">FEDEX_HOME_GROUND</td>
+              <td class="px-4 py-3">82.533</td>
+              <td class="px-4 py-3">USD</td>
+              <td class="px-4 py-3">
+                <button class="text-primary hover:text-primary/80"><i class="fa fa-eye"></i></button>
+              </td>
+            </tr>
+            
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3"><input type="checkbox" class="rounded text-primary focus:ring-primary"></td>
+              <td class="px-4 py-3">2025-11-12 16:23:45</td>
+              <td class="px-4 py-3">2025-11-12 16:06:46</td>
+              <td class="px-4 py-3">出库单</td>
+              <td class="px-4 py-3">DE001</td>
+              <td class="px-4 py-3">DEMO</td>
+              <td class="px-4 py-3">DEMO-20251112-8H196FIO...</td>
+              <td class="px-4 py-3">FEDEX_HOME_GROUND</td>
+              <td class="px-4 py-3">24.473</td>
+              <td class="px-4 py-3">USD</td>
+              <td class="px-4 py-3">
+                <button class="text-primary hover:text-primary/80"><i class="fa fa-eye"></i></button>
+              </td>
+            </tr>
+            
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3"><input type="checkbox" class="rounded text-primary focus:ring-primary"></td>
+              <td class="px-4 py-3">2025-11-12 14:18:24</td>
+              <td class="px-4 py-3">2025-11-12 11:02:12</td>
+              <td class="px-4 py-3">出库单</td>
+              <td class="px-4 py-3">DE001</td>
+              <td class="px-4 py-3">DEMO</td>
+              <td class="px-4 py-3">DEMO-20251112-3WSQ2WI...</td>
+              <td class="px-4 py-3">FEDEX_HOME_GROUND</td>
+              <td class="px-4 py-3">78.018</td>
+              <td class="px-4 py-3">USD</td>
+              <td class="px-4 py-3">
+                <button class="text-primary hover:text-primary/80"><i class="fa fa-eye"></i></button>
+              </td>
+            </tr>
+            
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3"><input type="checkbox" class="rounded text-primary focus:ring-primary"></td>
+              <td class="px-4 py-3">2025-11-12 14:19:04</td>
+              <td class="px-4 py-3">2025-11-12 10:29:18</td>
+              <td class="px-4 py-3">出库单</td>
+              <td class="px-4 py-3">DE001</td>
+              <td class="px-4 py-3">DEMO</td>
+              <td class="px-4 py-3">DEMO-20251112-JK9ZXVYJ...</td>
+              <td class="px-4 py-3">FEDEX_HOME_GROUND</td>
+              <td class="px-4 py-3">27.626</td>
+              <td class="px-4 py-3">USD</td>
+              <td class="px-4 py-3">
+                <button class="text-primary hover:text-primary/80"><i class="fa fa-eye"></i></button>
+              </td>
+            </tr>
+            
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3"><input type="checkbox" class="rounded text-primary focus:ring-primary"></td>
+              <td class="px-4 py-3">2025-11-12 14:22:03</td>
+              <td class="px-4 py-3">2025-11-12 10:24:31</td>
+              <td class="px-4 py-3">出库单</td>
+              <td class="px-4 py-3">DE001</td>
+              <td class="px-4 py-3">DEMO</td>
+              <td class="px-4 py-3">DEMO-20251112-Q2U72JPE...</td>
+              <td class="px-4 py-3">FEDEX_MPS</td>
+              <td class="px-4 py-3">423.925</td>
+              <td class="px-4 py-3">USD</td>
+              <td class="px-4 py-3">
+                <button class="text-primary hover:text-primary/80"><i class="fa fa-eye"></i></button>
+              </td>
+            </tr>
+            
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3"><input type="checkbox" class="rounded text-primary focus:ring-primary"></td>
+              <td class="px-4 py-3">2025-10-25 14:25:34</td>
+              <td class="px-4 py-3">2025-10-25 14:22:49</td>
+              <td class="px-4 py-3">出库单</td>
+              <td class="px-4 py-3">DEMO</td>
+              <td class="px-4 py-3">DEMO</td>
+              <td class="px-4 py-3">DEMO-20251025-H7QNQW...</td>
+              <td class="px-4 py-3">ZYBQ</td>
+              <td class="px-4 py-3">10</td>
+              <td class="px-4 py-3">USD</td>
+              <td class="px-4 py-3">
+                <button class="text-primary hover:text-primary/80"><i class="fa fa-eye"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- 分页控制 -->
+      <div class="px-4 py-3 flex items-center justify-between border-t border-gray-100">
+        <div class="text-sm text-gray-500">
+          Total 56
+        </div>
+        <div class="flex items-center gap-2">
+          <select class="border rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+            <option>10/page</option>
+            <option>20/page</option>
+            <option>50/page</option>
+          </select>
+          <nav class="flex items-center">
+            <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-400 hover:border-primary hover:text-primary disabled:opacity-50" disabled>
+              <i class="fa fa-angle-left"></i>
+            </button>
+            <button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-white">1</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary">2</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary">3</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary">4</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary">5</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 hover:border-primary hover:text-primary">6</button>
+            <button class="w-8 h-8 flex items-center justify-center rounded border border-gray-200 text-gray-600 hover:border-primary hover:text-primary">
+              <i class="fa fa-angle-right"></i>
+            </button>
+          </nav>
+          <div class="flex items-center gap-1">
+            <span class="text-sm text-gray-500">Go to</span>
+            <input type="text" value="1" class="w-10 h-8 border rounded text-center text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 重计明细弹窗 -->
+  <div id="recalculateModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-lg w-full max-w-7xl max-h-[90vh] flex flex-col transform scale-95 transition-transform duration-300">
+      <!-- 弹窗头部 -->
+      <div class="p-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="text-lg font-medium">重计明细</h3>
+        <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      
+      <!-- 弹窗搜索区域 -->
+      <div class="p-4 border-b border-gray-100 bg-gray-50">
+        <div class="flex flex-wrap gap-4">
+            <div class="flex items-center">
+            <label class="text-gray-500 mr-2 whitespace-nowrap">订单号</label>
+            <input type="text" class="border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary placeholder:text-gray-400" placeholder="请输入订单号、参考单号、跟踪号">
+          </div>
+          <div class="flex items-center">
+            <label class="text-gray-500 mr-2 whitespace-nowrap">操作时间</label>
+            <div class="flex gap-2">
+              <input type="date" class="border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+              <span class="text-gray-400">至</span>
+              <input type="date" class="border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+            </div>
+          </div>
+          
+          <div class="flex items-center">
+            <label class="text-gray-500 mr-2 whitespace-nowrap">计费类型</label>
+            <select class="border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+              <option>全部</option>
+              <option>出库单</option>
+              <option>仓储费</option>
+            </select>
+          </div>
+          
+          <div class="flex items-center">
+            <label class="text-gray-500 mr-2 whitespace-nowrap">物流产品</label>
+            <select class="border rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+              <option>全部</option>
+              <option>FEDEX_MPS</option>
+              <option>FEDEX_HOME_GROUND</option>
+              <option>ZYBQ</option>
+            </select>
+          </div>
+          
+          <button class="ml-auto px-4 py-1.5 bg-primary text-white rounded-md text-sm btn-hover">
+            搜索
+          </button>
+        </div>
+      </div>
+      
+      <!-- 状态标签页 -->
+      <div class="border-b border-gray-100 flex">
+        <button class="px-6 py-3 text-primary border-b-2 border-primary font-medium">
+            重计中
+        </button>
+        <button class="px-6 py-3 text-gray-500 hover:text-gray-700">
+            成功
+        </button>
+        <button class="px-6 py-3 text-gray-500 hover:text-gray-700">
+            失败
+        </button>
+      </div>
+      
+      <!-- 弹窗内容区域 -->
+      <div class="flex-1 overflow-y-auto p-4">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 text-left">
+              <th class="px-4 py-3 font-medium text-gray-500">操作时间</th>
+              <th class="px-4 py-3 font-medium text-gray-500">操作人</th>
+              <th class="px-4 py-3 font-medium text-gray-500">仓库代码</th>
+              <th class="px-4 py-3 font-medium text-gray-500">客户代码</th>
+              <th class="px-4 py-3 font-medium text-gray-500">订单号</th>
+              <th class="px-4 py-3 font-medium text-gray-500">物流产品</th>
+              <th class="px-4 py-3 font-medium text-gray-500">计费类型</th>
+              <th class="px-4 py-3 font-medium text-gray-500">计费时间</th>
+              <th class="px-4 py-3 font-medium text-gray-500">原金额</th>
+              <th class="px-4 py-3 font-medium text-gray-500">重计金额</th>
+              <th class="px-4 py-3 font-medium text-gray-500">失败原因</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 重计中数据 -->
+            <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3">2025-11-12 16:42:07</td>
+              <td class="px-4 py-3">system</td>
+              <td class="px-4 py-3">DEMO</td>
+              <td class="px-4 py-3">DE001</td>
+              <td class="px-4 py-3">DEMO-20251112-6GK8HTD...</td>
+              <td class="px-4 py-3">FEDEX_HOME_GROUND</td>
+              <td class="px-4 py-3">操作费</td>
+              <td class="px-4 py-3">2025-11-12 16:42:07</td>
+              <td class="px-4 py-3">98.667 USD</td>
+              <td class="px-4 py-3">-</td>
+              <td class="px-4 py-3">这是一条备注</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- 弹窗底部 -->
+      <div class="p-4 border-t border-gray-100 flex items-center justify-between">
+        <div class="text-sm text-gray-500">
+          共 1 条记录
+        </div>
+        <button class="px-4 py-1.5 border border-gray-200 rounded-md text-sm text-gray-600 hover:bg-gray-50 btn-hover" id="closeModalBtn">
+          关闭
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 重计明细弹窗功能
+    const modal = document.getElementById('recalculateModal');
+    const recalculateBtn = document.getElementById('recalculateBtn');
+    const closeModal = document.getElementById('closeModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    
+    // 打开弹窗
+    function openModal() {
+      modal.classList.remove('hidden');
+      // 触发重绘以启用过渡动画
+      setTimeout(() => {
+        modal.classList.add('opacity-100');
+        modal.querySelector('div').classList.remove('scale-95');
+        modal.querySelector('div').classList.add('scale-100');
+      }, 10);
+      document.body.style.overflow = 'hidden';
+    }
+    
+    // 关闭弹窗
+    function closeModalFunc() {
+      modal.classList.remove('opacity-100');
+      modal.querySelector('div').classList.remove('scale-100');
+      modal.querySelector('div').classList.add('scale-95');
+      
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }, 300);
+    }
+    
+    // 事件监听
+    recalculateBtn.addEventListener('click', openModal);
+    closeModal.addEventListener('click', closeModalFunc);
+    closeModalBtn.addEventListener('click', closeModalFunc);
+    
+    // 点击弹窗外部关闭
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModalFunc();
+      }
+    });
+    
+    // 状态标签页切换
+    const tabs = modal.querySelectorAll('.border-b button');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        // 移除所有标签的活跃状态
+        tabs.forEach(t => {
+          t.classList.remove('text-primary', 'border-primary', 'border-b-2', 'font-medium');
+          t.classList.add('text-gray-500');
+        });
+        
+        // 设置当前标签为活跃状态
+        tab.classList.remove('text-gray-500');
+        tab.classList.add('text-primary', 'border-primary', 'border-b-2', 'font-medium');
+        
+        // 这里可以添加切换内容的逻辑
+      });
+    });
+  </script>
+</body>
+</html>
