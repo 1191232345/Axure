@@ -84,8 +84,27 @@
         <button class="flex items-center text-secondary hover:text-primary transition-colors duration-200">
           <i class="fas fa-globe mr-1"></i> 语言
         </button>
-        <!-- 模拟用户头像 -->
-        <img src="https://picsum.photos/32/32" alt="用户头像" class="w-8 h-8 rounded-full object-cover border-2 border-primary">
+        <!-- 登录状态区域 -->
+        <div id="auth-section" class="flex items-center space-x-3">
+          <!-- 未登录状态 -->
+          <div id="login-status" class="flex items-center space-x-3">
+            <span class="text-sm text-gray-600">未登录</span>
+            <button id="login-btn" class="px-3 py-1.5 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors duration-200">
+              登录
+            </button>
+          </div>
+          <!-- 已登录状态（默认隐藏） -->
+          <div id="user-info" class="hidden flex items-center space-x-3">
+            <span id="username" class="text-sm text-gray-700"></span>
+            <button id="history-btn" class="text-sm text-gray-600 hover:text-primary transition-colors duration-200" title="历史记录">
+              <i class="fas fa-history"></i>
+            </button>
+            <img id="user-avatar" src="https://picsum.photos/32/32" alt="用户头像" class="w-8 h-8 rounded-full object-cover border-2 border-primary">
+            <button id="logout-btn" class="text-sm text-gray-600 hover:text-primary transition-colors duration-200">
+              <i class="fas fa-sign-out-alt"></i>
+            </button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -165,11 +184,11 @@
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
           <div class="md:col-span-5">
             <label for="warehouse-postal" class="block text-sm font-medium text-gray-700 mb-1"><span class="text-red-500">*</span>仓库邮编</label>
-            <input type="text" id="warehouse-postal" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus h-10" value="10000" placeholder="输入仓库邮编">
+            <input type="text" id="warehouse-postal" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus h-10" placeholder="输入仓库邮编">
           </div>
           <div class="md:col-span-5">
             <label for="container-no" class="block text-sm font-medium text-gray-700 mb-1"><span class="text-red-500">*</span>柜号</label>
-            <input type="text" id="container-no" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus h-10" value="CSNU8478948" placeholder="输入柜号">
+            <input type="text" id="container-no" class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus h-10" placeholder="输入柜号">
           </div>
           <div class="md:col-span-2 flex gap-2">
             <button id="reset-btn" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200 h-10 w-full sm:w-auto">重置</button>
@@ -269,10 +288,105 @@
     </main>
   </div>
 
+  <!-- 历史记录模态框 -->
+  <div id="history-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg p-6 m-4 w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-800">历史预约记录</h3>
+        <button id="history-close" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <!-- 筛选区域 -->
+      <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">开始日期</label>
+            <input type="date" id="history-start-date" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">结束日期</label>
+            <input type="date" id="history-end-date" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">订单状态</label>
+            <select id="history-status-filter" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              <option value="">全部状态</option>
+              <option value="pending">待处理</option>
+              <option value="processing">处理中</option>
+              <option value="completed">已完成</option>
+              <option value="cancelled">已取消</option>
+            </select>
+          </div>
+          <div class="flex items-end gap-2">
+            <button id="history-filter-btn" class="flex-1 px-3 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors">
+              筛选
+            </button>
+            <button id="history-reset-btn" class="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+              重置
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 历史记录列表 -->
+      <div class="flex-1 overflow-y-auto">
+        <div id="history-list" class="space-y-4">
+          <!-- 历史记录项将通过JS动态生成 -->
+        </div>
+        <div id="history-empty" class="text-center py-8 text-gray-500">
+          <i class="fas fa-history text-4xl text-gray-300 mb-4"></i>
+          <p>暂无历史记录</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 登录模态框 -->
+  <div id="login-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg p-6 m-4 w-full max-w-md">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-800">用户</h3>
+        <button id="close-login-btn" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label for="login-username" class="block text-sm font-medium text-gray-700 mb-1">用户名</label>
+          <input type="text" id="login-username" name="username" required
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus"
+                 placeholder="请输入用户名">
+        </div>
+        
+        <div>
+          <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+          <input type="password" id="login-password" name="password" required
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md input-focus"
+                 placeholder="请输入密码">
+        </div>
+        
+        <div class="flex items-center">
+          <input type="checkbox" id="remember-me" name="remember" class="mr-2">
+          <label for="remember-me" class="text-sm text-gray-600">记住我</label>
+        </div>
+        
+        <div class="flex gap-3 pt-2">
+          <button type="submit" 
+                  class="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors">
+            登录
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- 交互逻辑JS -->
   <script>
-    // 初始化页面
     document.addEventListener('DOMContentLoaded', function() {
+      // 初始化页面
       const searchBtn = document.getElementById('search-btn');
       const resetBtn = document.getElementById('reset-btn');
       const emptyState = document.getElementById('empty-state');
@@ -283,9 +397,204 @@
       const mobileGuideBtn = document.getElementById('mobile-guide-btn');
       const mobileGuideModal = document.getElementById('mobile-guide-modal');
       const closeGuideBtn = document.getElementById('close-guide-btn');
+      // 自动填充车队信息到表单
+      function autoFillTeamInfo() {
+        if (currentUser && currentUser.teamName) {
+          // 填充全局车队信息表单
+          const globalTeamNameInput = document.getElementById('global-team-name');
+          const globalTeamEmailInput = document.getElementById('global-team-email');
+          
+          if (globalTeamNameInput) {
+            globalTeamNameInput.value = currentUser.teamName;
+          }
+          
+          if (globalTeamEmailInput && currentUser.teamEmail) {
+            globalTeamEmailInput.value = currentUser.teamEmail;
+          }
+          
+          // 如果已有订单卡片，也更新它们的车队信息
+          const teamNameInputs = document.querySelectorAll('input[data-field="teamName"]');
+          const teamEmailInputs = document.querySelectorAll('input[data-field="teamEmail"]');
+          
+          teamNameInputs.forEach(input => {
+            if (!input.disabled) {
+              input.value = currentUser.teamName;
+            }
+          });
+          
+          teamEmailInputs.forEach(input => {
+            if (!input.disabled && currentUser.teamEmail) {
+              input.value = currentUser.teamEmail;
+            }
+          });
+          
+          console.log('车队信息已自动填充:', {
+            teamName: currentUser.teamName,
+            teamEmail: currentUser.teamEmail
+          });
+        }
+      }
       
-      // 存储所有订单数据
-      let orderDataList = [];
+      // 登录相关DOM元素
+      const loginBtn = document.getElementById('login-btn');
+      const logoutBtn = document.getElementById('logout-btn');
+      const loginModal = document.getElementById('login-modal');
+      const closeLoginBtn = document.getElementById('close-login-btn');
+      const cancelLoginBtn = document.getElementById('cancel-login-btn');
+      const loginForm = document.getElementById('login-form');
+      const loginUsername = document.getElementById('login-username');
+      const loginPassword = document.getElementById('login-password');
+      const rememberMe = document.getElementById('remember-me');
+      const loginStatus = document.getElementById('login-status');
+      const userInfo = document.getElementById('user-info');
+      const username = document.getElementById('username');
+      
+      // 历史记录相关DOM元素
+      const historyBtn = document.getElementById('history-btn');
+      const historyModal = document.getElementById('history-modal');
+      const historyClose = document.getElementById('history-close');
+      const historyList = document.getElementById('history-list');
+      const historyEmpty = document.getElementById('history-empty');
+      const historyStartDate = document.getElementById('history-start-date');
+      const historyEndDate = document.getElementById('history-end-date');
+      const historyStatusFilter = document.getElementById('history-status-filter');
+      const historyFilterBtn = document.getElementById('history-filter-btn');
+      const historyResetBtn = document.getElementById('history-reset-btn');
+      
+      // 登录状态管理
+      let currentUser = null;
+      
+      // 检查登录状态
+      function checkLoginStatus() {
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+          currentUser = JSON.parse(savedUser);
+          updateLoginUI(true);
+          hideLoginModal();
+          
+          // 自动填充车队信息到表单
+          autoFillTeamInfo();
+          
+          // 显示登录成功提示
+          showToast(`登录成功！欢迎回来，${username}`);
+        } else {
+          updateLoginUI(false);
+        }
+      }
+      
+      // 更新登录UI显示
+      function updateLoginUI(isLoggedIn) {
+        if (isLoggedIn && currentUser) {
+          // 显示已登录状态
+          loginStatus.classList.add('hidden');
+          userInfo.classList.remove('hidden');
+          username.textContent = currentUser.username;
+        } else {
+          // 显示未登录状态
+          loginStatus.classList.remove('hidden');
+          userInfo.classList.add('hidden');
+          username.textContent = '';
+          currentUser = null;
+          localStorage.removeItem('currentUser');
+        }
+      }
+      
+      // 显示登录模态框
+      function showLoginModal() {
+        loginModal.classList.remove('hidden');
+        loginUsername.value = '';
+        loginPassword.value = '';
+        rememberMe.checked = false;
+        loginUsername.focus();
+      }
+      
+      // 隐藏登录模态框
+      function hideLoginModal() {
+        loginModal.classList.add('hidden');
+      }
+      
+      function handleLogin(e) {
+        e.preventDefault();
+        
+        const username = loginUsername.value.trim();
+        const password = loginPassword.value.trim();
+        
+        if (!username || !password) {
+          alert('请输入用户名和密码');
+          return;
+        }
+        
+        // 模拟登录验证（实际应用中应该调用后端API）
+        if (username && password) {
+          // 根据用户名分配车队信息
+          let teamInfo = {};
+          if (username === 'demo') {
+            teamInfo = {
+              teamName: 'demo',
+              teamEmail: 'demo@example.com'
+            };
+          } else if (username === 'admin') {
+            teamInfo = {
+              teamName: 'demo',
+              teamEmail: 'demo@example.com'
+            };
+          } else {
+            // 默认车队信息
+            teamInfo = {
+              teamName: `${username}车队`,
+              teamEmail: `${username}@example.com`
+            };
+          }
+          
+          currentUser = {
+            username: username,
+            loginTime: new Date().toISOString(),
+            ...teamInfo
+          };
+          
+          // 如果选择记住我，则保存到localStorage
+          if (rememberMe.checked) {
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+          }
+          
+          updateLoginUI(true);
+          hideLoginModal();
+          
+          // 自动填充车队信息到表单
+          autoFillTeamInfo();
+          
+          // 显示登录成功提示
+          showToast(`登录成功！欢迎回来，${username}`);
+        } else {
+          alert('用户名或密码错误');
+        }
+      }
+      
+      // 处理登出
+      function handleLogout() {
+        if (currentUser && confirm('确定要退出登录吗？')) {
+          updateLoginUI(false);
+          showToast('已成功退出登录');
+        }
+      }
+      
+      // 显示提示消息
+      function showToast(message) {
+        // 创建提示元素
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg z-50 transition-opacity duration-300';
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        // 3秒后自动消失
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => {
+            document.body.removeChild(toast);
+          }, 300);
+        }, 3000);
+      }
       
       // 搜索按钮点击事件
       searchBtn.addEventListener('click', function() {
@@ -334,6 +643,9 @@
         searchResultInfo.classList.add('hidden');
         orderCardsContainer.classList.add('hidden');
         orderCardsContainer.innerHTML = '';
+        
+        // 隐藏预约信息面板
+        document.getElementById('reservation-info-panel').classList.add('hidden');
       });
 
       // 移动端操作指引显示/隐藏
@@ -349,6 +661,83 @@
       mobileGuideModal.addEventListener('click', function(e) {
         if (e.target === mobileGuideModal) {
           mobileGuideModal.classList.add('hidden');
+        }
+      });
+
+      // 登录相关事件监听器
+      // 登录按钮点击事件
+      if (loginBtn) {
+        loginBtn.addEventListener('click', showLoginModal);
+      }
+      
+      // 登出按钮点击事件
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+      }
+      
+      // 关闭登录模态框
+      if (closeLoginBtn) {
+        closeLoginBtn.addEventListener('click', hideLoginModal);
+      }
+      if (cancelLoginBtn) {
+        cancelLoginBtn.addEventListener('click', hideLoginModal);
+      }
+      
+      // 点击模态框外部关闭
+      if (loginModal) {
+        loginModal.addEventListener('click', function(e) {
+          if (e.target === loginModal) {
+            hideLoginModal();
+          }
+        });
+      }
+      
+      // 登录表单提交事件
+      if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+      }
+      
+      // ESC键关闭登录模态框
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && loginModal && !loginModal.classList.contains('hidden')) {
+          hideLoginModal();
+        }
+      });
+
+      // 历史记录相关事件监听器
+      // 历史记录按钮点击事件
+      if (historyBtn) {
+        historyBtn.addEventListener('click', showHistoryModal);
+      }
+      
+      // 关闭历史记录模态框
+      if (historyClose) {
+        historyClose.addEventListener('click', hideHistoryModal);
+      }
+      
+      // 筛选按钮点击事件
+      if (historyFilterBtn) {
+        historyFilterBtn.addEventListener('click', filterHistoryRecords);
+      }
+      
+      // 重置筛选按钮点击事件
+      if (historyResetBtn) {
+        historyResetBtn.addEventListener('click', resetHistoryFilter);
+      }
+      
+      // 点击模态框外部关闭
+      if (historyModal) {
+        historyModal.addEventListener('click', function(e) {
+          if (e.target === historyModal) {
+            hideHistoryModal();
+          }
+        });
+      }
+      
+      // ESC键关闭历史记录模态框
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && historyModal && !historyModal.classList.contains('hidden')) {
+          hideHistoryModal();
         }
       });
 
@@ -382,7 +771,7 @@
           contactPerson: '李四',
           contactPhone: '13900139000',
           warehouseAddress: '上海市浦东新区张江高科技园区博云路2号仓库B区',
-          teamName: '中通车队',
+          teamName: '中客车队',
           status: '待仓库审核'
         },
         {
@@ -717,6 +1106,24 @@
         
         console.log('全局提交订单数据:', formData);
         
+        // 为每个提交的订单创建历史记录
+        pendingOrders.forEach(order => {
+          const historyRecord = {
+            id: Date.now() + order.id, // 使用时间戳+订单ID确保唯一性
+            orderNo: order.orderNo,
+            warehouseNo: order.warehouseNo,
+            contactPerson: order.contactPerson,
+            contactPhone: order.contactPhone,
+            teamName: order.teamName,
+            appointmentTime: warehouseTime,
+            createTime: new Date().toISOString(),
+            status: 'pending'
+          };
+          
+          // 添加到历史记录
+          addHistoryRecord(historyRecord);
+        });
+        
         // 模拟提交成功，统计成功数量
         // 显示更突出的提示信息
         alert(`✅ 预约提交成功！\n📋 已成功提交 ${pendingOrders.length} 个订单\n⚠️ ⚠️ ⚠️ 重要提示：系统仅处理"待预约"和"待仓库确认"状态的订单 ⚠️ ⚠️ ⚠️`);
@@ -793,32 +1200,241 @@
         });
       }
 
+      // 历史记录相关函数
+      function showHistoryModal() {
+        if (!currentUser) {
+          showToast('请先登录后再查看历史记录');
+          showLoginModal();
+          return;
+        }
+        
+        // 加载历史记录
+        loadHistoryRecords();
+        
+        // 显示模态框
+        historyModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+      
+      function hideHistoryModal() {
+        historyModal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+      }
+      
+      function loadHistoryRecords() {
+        // 从localStorage获取历史记录
+        const historyKey = `history_${currentUser.username}`;
+        const historyData = localStorage.getItem(historyKey);
+        const records = historyData ? JSON.parse(historyData) : [];
+        
+        // 显示历史记录
+        displayHistoryRecords(records);
+      }
+      
+      function displayHistoryRecords(records) {
+        if (records.length === 0) {
+          historyList.innerHTML = '';
+          historyEmpty.classList.remove('hidden');
+          return;
+        }
+        
+        historyEmpty.classList.add('hidden');
+        historyList.innerHTML = '';
+        
+        records.forEach(record => {
+          const recordElement = createHistoryRecordElement(record);
+          historyList.appendChild(recordElement);
+        });
+      }
+      
+      function createHistoryRecordElement(record) {
+        const div = document.createElement('div');
+        div.className = 'bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow';
+        
+        const statusClass = getStatusClass(record.status);
+        const statusText = getStatusText(record.status);
+        
+        div.innerHTML = `
+          <div class="flex justify-between items-start mb-3">
+            <div>
+              <h4 class="font-medium text-gray-800">订单号: ${record.orderNo}</h4>
+              <p class="text-sm text-gray-600">仓库编号: ${record.warehouseNo}</p>
+            </div>
+            <span class="px-2 py-1 text-xs rounded-full ${statusClass}">${statusText}</span>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
+            <div>
+              <span class="font-medium">联系人:</span> ${record.contactPerson}
+            </div>
+            <div>
+              <span class="font-medium">电话:</span> ${record.contactPhone}
+            </div>
+            <div>
+              <span class="font-medium">车队:</span> ${record.teamName}
+            </div>
+            <div>
+              <span class="font-medium">预约时间:</span> ${new Date(record.appointmentTime).toLocaleString()}
+            </div>
+          </div>
+          
+          <div class="text-sm text-gray-500">
+            <span class="font-medium">创建时间:</span> ${new Date(record.createTime).toLocaleString()}
+          </div>
+        `;
+        
+        return div;
+      }
+      
+      function getStatusClass(status) {
+        switch (status) {
+          case 'pending':
+            return 'bg-yellow-100 text-yellow-800';
+          case 'approved':
+            return 'bg-green-100 text-green-800';
+          case 'rejected':
+            return 'bg-red-100 text-red-800';
+          default:
+            return 'bg-gray-100 text-gray-800';
+        }
+      }
+      
+      function getStatusText(status) {
+        switch (status) {
+          case 'pending':
+            return '待审核';
+          case 'approved':
+            return '已审核';
+          case 'rejected':
+            return '已拒绝';
+          default:
+            return '未知状态';
+        }
+      }
+      
+      function filterHistoryRecords() {
+        const startDate = historyStartDate.value;
+        const endDate = historyEndDate.value;
+        const statusFilter = historyStatusFilter.value;
+        
+        // 获取所有历史记录
+        const historyKey = `history_${currentUser.username}`;
+        const historyData = localStorage.getItem(historyKey);
+        let records = historyData ? JSON.parse(historyData) : [];
+        
+        // 应用筛选条件
+        if (startDate) {
+          records = records.filter(record => {
+            return new Date(record.createTime) >= new Date(startDate);
+          });
+        }
+        
+        if (endDate) {
+          records = records.filter(record => {
+            return new Date(record.createTime) <= new Date(endDate + ' 23:59:59');
+          });
+        }
+        
+        if (statusFilter) {
+          records = records.filter(record => record.status === statusFilter);
+        }
+        
+        // 显示筛选后的记录
+        displayHistoryRecords(records);
+      }
+      
+      function resetHistoryFilter() {
+        historyStartDate.value = '';
+        historyEndDate.value = '';
+        historyStatusFilter.value = '';
+        
+        // 重新加载所有记录
+        loadHistoryRecords();
+      }
+      
+      function initHistoryRecords() {
+        // 初始化历史记录数据（如果不存在）
+        if (currentUser) {
+          const historyKey = `history_${currentUser.username}`;
+          const historyData = localStorage.getItem(historyKey);
+          
+          if (!historyData) {
+            // 创建示例历史记录
+            const sampleRecords = [
+              {
+                id: 1,
+                orderNo: 'ORD20241201001',
+                warehouseNo: 'WH20241201001',
+                contactPerson: '张三',
+                contactPhone: '13800138000',
+                teamName: '顺丰车队',
+                appointmentTime: '2024-12-01T10:30:00',
+                createTime: '2024-12-01T09:00:00',
+                status: 'approved'
+              },
+              {
+                id: 2,
+                orderNo: 'ORD20241128001',
+                warehouseNo: 'WH20241128001',
+                contactPerson: '李四',
+                contactPhone: '13900139000',
+                teamName: '中客车队',
+                appointmentTime: '2024-11-28T14:00:00',
+                createTime: '2024-11-28T10:30:00',
+                status: 'pending'
+              },
+              {
+                id: 3,
+                orderNo: 'ORD20241125001',
+                warehouseNo: 'WH20241125001',
+                contactPerson: '王五',
+                contactPhone: '13700137000',
+                teamName: '韵达车队',
+                appointmentTime: '2024-11-25T09:00:00',
+                createTime: '2024-11-25T08:00:00',
+                status: 'rejected'
+              }
+            ];
+            
+            localStorage.setItem(historyKey, JSON.stringify(sampleRecords));
+          }
+        }
+      }
+      
+      // 添加历史记录函数
+      function addHistoryRecord(orderData) {
+        if (!currentUser) return;
+        
+        const historyKey = `history_${currentUser.username}`;
+        const historyData = localStorage.getItem(historyKey);
+        const records = historyData ? JSON.parse(historyData) : [];
+        
+        const newRecord = {
+          id: Date.now(),
+          orderNo: orderData.orderNo,
+          warehouseNo: orderData.warehouseNo,
+          contactPerson: orderData.contactPerson,
+          contactPhone: orderData.contactPhone,
+          teamName: orderData.teamName,
+          appointmentTime: new Date().toISOString(),
+          createTime: new Date().toISOString(),
+          status: 'pending'
+        };
+        
+        records.unshift(newRecord);
+        localStorage.setItem(historyKey, JSON.stringify(records));
+      }
+
       // 初始化页面
       function initPage() {
-        // 使用已获取的orderCardsContainer元素
-        if (orderCardsContainer) {
-          // 清空容器
-          orderCardsContainer.innerHTML = '';
-          
-          // 生成订单卡片
-          orderData.forEach(order => {
-            const card = generateOrderCard(order);
-            orderCardsContainer.appendChild(card);
-          });
-          
-          // 显示搜索结果，隐藏空状态
-          emptyState.classList.add('hidden');
-          searchResultInfo.classList.remove('hidden');
-          orderCardsContainer.classList.remove('hidden');
-          
-          // 显示右侧预约信息面板
-          document.getElementById('reservation-info-panel').classList.remove('hidden');
-          
-          // 更新订单数量显示
-          orderCount.textContent = orderData.length;
-        } else {
-          console.warn('未找到订单容器元素');
-        }
+        // 检查登录状态
+        checkLoginStatus();
+        
+        // 初始化历史记录
+        initHistoryRecords();
+        
+        // 页面默认只显示空状态，其他内容保持隐藏
+        // 不自动显示订单和预约信息，等待用户查询
       }
 
       // 页面加载完成后初始化
