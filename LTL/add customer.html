@@ -599,7 +599,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">
                                 详细地址
                             </label>
-                            <textarea id="sender-address" rows="3" class="form-input" placeholder="请输入详细地址" disabled></textarea>
+                            <textarea id="sender-address" rows="3" class="form-input" placeholder="请输入详细地址" disabled>TEST</textarea>
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -607,13 +607,13 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-1">
                                     联系人
                                 </label>
-                                <input type="text" id="sender-name" class="form-input" placeholder="请输入联系人姓名" disabled>
+                                <input type="text" id="sender-name" class="form-input" placeholder="请输入联系人姓名" disabled value="张三">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">
                                     联系电话
                                 </label>
-                                <input type="tel" id="sender-phone" class="form-input" placeholder="请输入联系电话" disabled>
+                                <input type="tel" id="sender-phone" class="form-input" placeholder="请输入联系电话" disabled value="13800138000">
                             </div>
                         </div>
                         
@@ -703,23 +703,23 @@
                                     <span class="text-red-500">*</span>提货日期
                                 </label>
                                 <input type="date" id="pickup-date" required
-                                    class="form-input">
+                                    class="form-input" value="2025-12-01">
                             </div>
                         </div>
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">详细地址</label>
-                            <textarea id="receiver-address" rows="3" class="form-input" placeholder="请输入详细地址" disabled></textarea>
+                            <textarea id="receiver-address" rows="3" class="form-input" placeholder="请输入详细地址" disabled>TEST</textarea>
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">联系人</label>
-                                <input type="text" id="receiver-name" class="form-input" placeholder="请输入联系人姓名" disabled>
+                                <input type="text" id="receiver-name" class="form-input" placeholder="请输入联系人姓名" disabled value="zsw">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">联系电话</label>
-                                <input type="tel" id="receiver-phone" class="form-input" placeholder="请输入联系电话" disabled>
+                                <input type="tel" id="receiver-phone" class="form-input" placeholder="请输入联系电话" disabled value="13900139000">
                             </div>
                         </div>
                         
@@ -1500,8 +1500,8 @@
                 width: defaultWidth,
                 height: defaultHeight,
                 weight: defaultWeight,
-                value: '',
-                productName: '',
+                value: '1000',
+                productName: '电子产品',
                 // 应用全局属性设置
                 ...globalProperties
             };
@@ -1786,6 +1786,265 @@
             }
         }
 
+        // 生成模拟报价数据
+        function generateQuotationData() {
+            const suppliers = [
+                'Fast Logistics', 'Speed Express', 'Reliable Transport', 
+                'Quick Ship', 'Safe Cargo', 'Express Delivery',
+                'Premium Freight', 'Economy Shipping'
+            ];
+            
+            const quotations = [];
+            const today = new Date();
+            
+            // 生成未来7天的报价数据
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                
+                // 每天生成3-5个不同供应商的报价
+                const dailyQuotations = [];
+                const quotationCount = Math.floor(Math.random() * 3) + 3; // 3-5个报价
+                
+                for (let j = 0; j < quotationCount; j++) {
+                    const basePrice = 1200 + Math.random() * 800; // 1200-2000的基础价格
+                    const price = Math.round(basePrice);
+                    const supplier = suppliers[Math.floor(Math.random() * suppliers.length)];
+                    
+                    dailyQuotations.push({
+                        date: date.toISOString().split('T')[0],
+                        price: price,
+                        supplier: supplier,
+                        deliveryTime: 2 + Math.floor(Math.random() * 4) // 2-5天
+                    });
+                }
+                
+                // 按价格排序
+                dailyQuotations.sort((a, b) => a.price - b.price);
+                quotations.push(...dailyQuotations);
+            }
+            
+            return quotations;
+        }
+
+        // 显示报价结果弹窗
+        function showQuotationResult() {
+            const quotations = generateQuotationData();
+            
+            // 按日期分组并排序
+            const groupedByDate = {};
+            quotations.forEach(q => {
+                if (!groupedByDate[q.date]) {
+                    groupedByDate[q.date] = [];
+                }
+                groupedByDate[q.date].push(q);
+            });
+            
+            // 对每天的报价按价格排序
+            Object.keys(groupedByDate).forEach(date => {
+                groupedByDate[date].sort((a, b) => a.price - b.price);
+            });
+            
+            // 获取所有日期并排序
+            const sortedDates = Object.keys(groupedByDate).sort();
+            
+            // 生成日期标签
+            const dateTabs = document.getElementById('date-tabs');
+            dateTabs.innerHTML = '';
+            
+            sortedDates.forEach((date, index) => {
+                const dateObj = new Date(date);
+                const weekDay = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][dateObj.getDay()];
+                const dayQuotations = groupedByDate[date];
+                const lowestPrice = dayQuotations[0].price;
+                
+                const dateTab = document.createElement('button');
+                dateTab.className = `date-tab px-4 py-2 rounded-lg border transition-all duration-200 ${
+                    index === 0 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+                }`;
+                dateTab.setAttribute('data-date', date);
+                dateTab.innerHTML = `
+                    <div class="text-sm font-medium">${dateObj.getMonth() + 1}月${dateObj.getDate()}日</div>
+                    <div class="text-xs ${index === 0 ? 'text-blue-100' : 'text-gray-500'}">${weekDay}</div>
+                    <div class="text-xs font-bold ${index === 0 ? 'text-blue-100' : 'text-green-600'}">¥${lowestPrice.toLocaleString()}起</div>
+                `;
+                
+                dateTab.onclick = () => selectDate(date, dateTab);
+                dateTabs.appendChild(dateTab);
+            });
+            
+            // 默认显示第一天的价格
+            selectDate(sortedDates[0], dateTabs.querySelector('.date-tab'));
+            
+            // 显示弹窗
+            document.getElementById('quotation-result-modal').classList.remove('hidden');
+        }
+
+        // 选择日期显示对应的价格列表
+        function selectDate(date, selectedTab) {
+            // 添加切换动画效果
+            const priceList = document.getElementById('price-list');
+            priceList.style.opacity = '0';
+            priceList.style.transform = 'translateY(10px)';
+            
+            setTimeout(() => {
+                // 更新标签样式
+                document.querySelectorAll('.date-tab').forEach(tab => {
+                    tab.className = 'date-tab px-4 py-2 rounded-lg border transition-all duration-200 bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:shadow-sm';
+                    tab.querySelectorAll('div')[1].className = 'text-xs text-gray-500';
+                    tab.querySelectorAll('div')[2].className = 'text-xs font-bold text-green-600';
+                });
+                
+                selectedTab.className = 'date-tab px-4 py-2 rounded-lg border transition-all duration-200 bg-blue-600 text-white border-blue-600 shadow-lg transform scale-105';
+                selectedTab.querySelectorAll('div')[1].className = 'text-xs text-blue-100';
+                selectedTab.querySelectorAll('div')[2].className = 'text-xs font-bold text-blue-100';
+                
+                // 获取选中日期的报价数据
+                const quotations = generateQuotationData();
+                const groupedByDate = {};
+                quotations.forEach(q => {
+                    if (!groupedByDate[q.date]) {
+                        groupedByDate[q.date] = [];
+                    }
+                    groupedByDate[q.date].push(q);
+                });
+                
+                // 对每天的报价按价格排序
+                Object.keys(groupedByDate).forEach(date => {
+                    groupedByDate[date].sort((a, b) => a.price - b.price);
+                });
+                
+                const dayQuotations = groupedByDate[date];
+                
+                // 生成价格列表
+                priceList.innerHTML = '';
+                
+                // 添加日期标题
+                const dateObj = new Date(date);
+                const weekDay = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][dateObj.getDay()];
+                
+                const dateHeader = document.createElement('div');
+                dateHeader.className = 'bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 mb-4 shadow-sm';
+                dateHeader.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-blue-800">
+                                ${dateObj.getMonth() + 1}月${dateObj.getDate()}日 ${weekDay}
+                            </h3>
+                            <p class="text-sm text-blue-600">共 ${dayQuotations.length} 个车队报价</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-600">最低价格</p>
+                            <p class="text-2xl font-bold text-green-600">¥${dayQuotations[0].price.toLocaleString()}</p>
+                        </div>
+                    </div>
+                `;
+                priceList.appendChild(dateHeader);
+                
+                // 生成价格条目
+                dayQuotations.forEach((quotation, index) => {
+                    const priceItem = document.createElement('div');
+                    const isLowest = index === 0;
+                    
+                    priceItem.className = `price-item border rounded-lg p-4 transition-all duration-300 mb-3 ${
+                        isLowest ? 'border-green-400 bg-green-50 shadow-md' : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
+                    }`;
+                    priceItem.style.opacity = '0';
+                    priceItem.style.transform = 'translateY(20px)';
+                    
+                    priceItem.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                ${isLowest ? '<div class="bg-green-500 text-white px-2 py-1 rounded text-xs font-bold animate-pulse">最低价</div>' : ''}
+                                <div>
+                                    <div class="font-semibold text-lg ${isLowest ? 'text-green-700' : 'text-gray-800'}">
+                                        ¥${quotation.price.toLocaleString()}
+                                    </div>
+                                    <div class="text-sm text-gray-600">${quotation.supplier}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-6">
+                                <div class="text-center">
+                                    <div class="text-xs text-gray-500">时效</div>
+                                    <div class="text-sm font-medium">${quotation.deliveryTime}天</div>
+                                </div>
+                                <button class="px-4 py-2 ${isLowest ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-lg transition-all duration-200 text-sm hover:shadow-lg transform hover:scale-105 select-quotation-btn">
+                                    选择此报价
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // 添加选择报价的点击事件
+                    const selectBtn = priceItem.querySelector('.select-quotation-btn');
+                    selectBtn.onclick = () => selectQuotation(quotation, priceItem);
+                    
+                    priceList.appendChild(priceItem);
+                    
+                    // 添加渐入动画
+                    setTimeout(() => {
+                        priceItem.style.opacity = '1';
+                        priceItem.style.transform = 'translateY(0)';
+                    }, 100 + index * 50);
+                });
+                
+                // 恢复价格列表显示
+                setTimeout(() => {
+                    priceList.style.opacity = '1';
+                    priceList.style.transform = 'translateY(0)';
+                }, 50);
+            }, 200);
+        }
+
+        // 选择报价的处理函数
+        function selectQuotation(quotation, priceItem) {
+            // 移除其他选中状态
+            document.querySelectorAll('.price-item').forEach(item => {
+                item.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50');
+                const btn = item.querySelector('.select-quotation-btn');
+                if (btn) {
+                    btn.textContent = '选择此报价';
+                    btn.classList.remove('bg-gray-600', 'hover:bg-gray-700');
+                    btn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                }
+            });
+            
+            // 添加选中状态
+            priceItem.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50');
+            const selectBtn = priceItem.querySelector('.select-quotation-btn');
+            selectBtn.textContent = '已选择';
+            selectBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            selectBtn.classList.add('bg-gray-600', 'hover:bg-gray-700');
+            
+            // 显示选中提示
+            showNotification(`已选择 ${quotation.supplier} 的报价：¥${quotation.price.toLocaleString()}`);
+        }
+
+        // 显示通知消息
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // 关闭报价结果弹窗
+        function closeQuotationResult() {
+            document.getElementById('quotation-result-modal').classList.add('hidden');
+        }
+
         // 提交询价
         function submitInquiry() {
             if (!validateForm()) {
@@ -1797,9 +2056,12 @@
             
             // 模拟询价过程
             setTimeout(() => {
-                // 这里可以添加实际的询价逻辑
-                showNotification('询价请求已发送，正在等待车队报价...', 'info');
-            }, 1000);
+                // 关闭等待弹窗
+                document.getElementById('inquiry-waiting-modal').classList.add('hidden');
+                
+                // 显示报价结果
+                showQuotationResult();
+            }, 2000); // 2秒后显示结果
         }
 
         // 关闭询价等待弹窗
@@ -1867,11 +2129,11 @@
                 errors.push('请选择收货地址类型');
             }
             
-            // 验证收货地址配送服务（至少选择一个）
-            const selectedDeliveryServices = getDropdownSelectedValues('receiver-delivery');
-            if (selectedDeliveryServices.length === 0) {
-                errors.push('请选择至少一个收货地址配送服务');
-            }
+            // 收货地址配送服务改为非必填
+            // const selectedDeliveryServices = getDropdownSelectedValues('receiver-delivery');
+            // if (selectedDeliveryServices.length === 0) {
+            //     errors.push('请选择至少一个收货地址配送服务');
+            // }
             
             if (palletRows.length === 0) {
                 errors.push('请至少添加一个托盘');
@@ -2385,6 +2647,47 @@
                 <button type="button" class="btn btn-success" onclick="confirmBatchPalletParsing()" disabled id="confirm-batch-parsing">
                     <i class="fas fa-check mr-2"></i>确认添加托盘
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 报价结果弹窗 -->
+    <div id="quotation-result-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-chart-line mr-2"></i>报价结果分析
+                </h3>
+                <button class="modal-close" onclick="closeQuotationResult()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- 12306风格价格展示 -->
+                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4">
+                        <h4 class="text-lg font-semibold flex items-center">
+                            <i class="fas fa-calendar-alt mr-2"></i>
+                            报价详情（按日期和价格排序）
+                        </h4>
+                        <p class="text-sm text-blue-100 mt-1">点击日期查看当天所有报价</p>
+                    </div>
+                    
+                    <!-- 日期选择标签 -->
+                    <div class="border-b border-gray-200 bg-gray-50 p-3">
+                        <div id="date-tabs" class="flex space-x-2 overflow-x-auto">
+                            <!-- 日期标签将动态生成 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 价格列表 -->
+                    <div class="p-4">
+                        <div id="price-list" class="space-y-2">
+                            <!-- 价格列表将动态生成 -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
